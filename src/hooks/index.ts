@@ -1,1 +1,0 @@
-export { useSwipeGestures, useDeviceCapabilities, useMobileOptimization } from './useGestures';

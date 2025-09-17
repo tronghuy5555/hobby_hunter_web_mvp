@@ -1,117 +1,73 @@
-# HobbyHunter - Card Pack Store MVP
+# Welcome to your Lovable project
 
-A React + TypeScript frontend application for a digital card pack opening store experience. This MVP simulates purchasing card packs, opening them with engaging animations, managing collected cards, and handling user transactions.
+## Project info
 
-## Features
+**URL**: https://lovable.dev/projects/d9939c56-526a-4bec-a35b-68660264fed0
 
-- 🎴 Interactive pack opening with Framer Motion animations
-- 🗂️ Card collection with expiry countdown and auto-conversion to credits
-- 💳 Credit-based purchasing with PayPal payment integration mockup
-- 📱 Responsive mobile-first design with touch gestures
-- 🎯 Mock Service Worker (MSW) for realistic API simulation
+## How can I edit this code?
 
-## Technology Stack
+There are several ways of editing your application.
 
-- **React 18** - Component-based UI framework
-- **TypeScript** - Type safety and developer experience
-- **Vite** - Build tool and development server
-- **Tailwind CSS** - Utility-first CSS framework
-- **Framer Motion** - Animation library for pack reveals
-- **Zustand** - Lightweight state management
-- **React Router v6** - Client-side routing
-- **MSW** - API mocking layer
+**Use Lovable**
 
-## Quick Start
+Simply visit the [Lovable Project](https://lovable.dev/projects/d9939c56-526a-4bec-a35b-68660264fed0) and start prompting.
 
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
+Changes made via Lovable will be committed automatically to this repo.
 
-### Installation
+**Use your preferred IDE**
 
-```bash
-# Clone and navigate to the project
-cd hobby_hunter_web_mvp
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-# Install dependencies
-npm install
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-# Start development server
+Follow these steps:
+
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173`
+**Edit a file directly in GitHub**
 
-### Available Scripts
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+**Use GitHub Codespaces**
 
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## Project Structure
+## What technologies are used for this project?
 
-```
-src/
-├── components/
-│   ├── layout/          # Header, Navigation, Footer
-│   ├── cards/           # CardDisplay, CardList, TopCardsCarousel
-│   ├── packs/           # PackCard, PackGrid, PackRevealAnimation
-│   ├── ui/              # Button, Modal, LoadingSpinner, CountdownTimer
-│   └── forms/           # PaymentForm, ShippingForm
-├── pages/               # Home, OpenPack, MyCards, Shipping, Account, About
-├── store/               # Zustand stores (useAppStore)
-├── services/            # API service layer with Axios
-├── hooks/               # Custom React hooks
-├── types/               # TypeScript interfaces and enums
-├── mocks/               # MSW handlers and mock data
-├── utils/               # Helper functions and constants
-└── assets/              # Images, icons, static files
-```
+This project is built with:
 
-## Key Features
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-### Card Rarity System
-- Common (Gray) - Base cards with standard value
-- Uncommon (Green) - Slightly enhanced cards
-- Rare (Blue) - Valuable cards with special effects
-- Epic (Purple) - Highly sought-after cards
-- Legendary (Gold) - Extremely rare and valuable
-- Mythic (Red) - Ultimate rarity with maximum value
+## How can I deploy this project?
 
-### Pack Opening Experience
-- Animated pack opening with Framer Motion
-- Sequential card reveals sorted by rarity
-- Skip to rare cards functionality
-- Touch gestures for mobile devices
+Simply open [Lovable](https://lovable.dev/projects/d9939c56-526a-4bec-a35b-68660264fed0) and click on Share -> Publish.
 
-### Card Management
-- Automatic expiry countdown (30 days)
-- Auto-conversion to credits when expired
-- Bulk shipping to physical address
-- Filter and sort by rarity, value, expiry
+## Can I connect a custom domain to my Lovable project?
 
-## Mock Data
+Yes, you can!
 
-The application uses MSW to simulate a complete backend. All API calls are intercepted and return realistic mock data for:
-- User authentication and profiles
-- Pack purchasing and opening
-- Card collection management
-- Payment processing simulation
-- Shipping and tracking
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
-## Mobile Features
-
-- Touch gestures for pack opening
-- Swipe navigation for card browsing
-- Responsive design for all screen sizes
-- Mobile-optimized animations
-
-## Future Enhancements
-
-- Real backend API integration
-- User authentication system
-- PayPal payment gateway
-- Push notifications
-- Trading system between users
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)

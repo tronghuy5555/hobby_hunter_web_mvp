@@ -1,144 +1,163 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '../store';
-import { PackGrid } from '../components/packs';
-import { TopCardsCarousel } from '../components/cards';
-import { Button, CarouselSkeleton, PackGridSkeleton } from '../components/ui';
-import { PaymentMethod } from '../types';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useGameStore } from '@/store/gameStore';
+import PackCard from '@/components/PackCard';
+import CardDisplay from '@/components/CardDisplay';
+import { Link } from 'react-router-dom';
+import heroPackImage from '@/assets/hero-pack.jpg';
 
-const HomePage: React.FC = () => {
-  const navigate = useNavigate();
-  const { 
-    availablePacks, 
-    topCards, 
-    isLoading, 
-    purchasePack, 
-    user, 
-    isAuthenticated 
-  } = useAppStore();
-
-  const handlePackPurchase = async (packId: string) => {
-    if (!isAuthenticated) {
-      alert('Please log in to purchase packs');
-      return;
-    }
-
-    try {
-      const response = await purchasePack(packId, PaymentMethod.CREDITS);
-      if (response.success) {
-        navigate(`/open-pack/${packId}`, { 
-          state: { 
-            cards: response.cards,
-            packName: availablePacks.find(p => p.id === packId)?.name 
-          } 
-        });
-      }
-    } catch (error) {
-      console.error('Purchase failed:', error);
-    }
+const HomePage = () => {
+  const { featuredPacks, setCurrentPack } = useGameStore();
+  
+  const handleBuyPack = (pack: any) => {
+    setCurrentPack(pack);
+    // In a real app, this would navigate to payment flow
+    console.log('Buying pack:', pack.name);
   };
 
-  const isLoadingData = isLoading === 'loading';
-  const hasData = availablePacks.length > 0 || topCards.length > 0;
+  const topCards = featuredPacks[0]?.topCards || [];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-hero">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-900 via-primary-800 to-background-primary relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-primary-500 rounded-full blur-3xl animate-pulse-slow"></div>
-          <div className="absolute bottom-20 right-10 w-48 h-48 bg-yellow-500 rounded-full blur-3xl animate-bounce-slow"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500 rounded-full blur-3xl animate-pulse"></div>
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-          <div className="text-center fade-in">
-            <h1 className="text-4xl md:text-6xl font-gaming font-bold text-white mb-6 text-reveal">
-              <span>Welcome</span> <span>to</span>{' '}
-              <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent hover-glow">
+      <section className="relative py-20 px-4">
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center max-w-4xl mx-auto"
+          >
+            <Badge className="mb-6 bg-gradient-primary text-white px-4 py-2">
+              Safe Virtual Pack Opening
+            </Badge>
+            
+            <h1 className="text-5xl md:text-7xl font-bold mb-6">
+              <span className="bg-gradient-primary bg-clip-text text-transparent">
                 HobbyHunter
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto slide-up">
-              Open digital card packs, collect rare cards, and ship your favorites to your doorstep!
+            
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed">
+              Experience the thrill of opening trading card packs in a safe, controlled environment. 
+              Get that dopamine hit without the real-world violence.
             </p>
             
-            <div className="scale-in">
-              {isAuthenticated && user ? (
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <div className="bg-background-card/50 backdrop-blur-sm rounded-lg px-6 py-3 border border-gray-600 hover-lift pulse-glow">
-                    <span className="text-gray-300">Your Balance:</span>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className="text-yellow-400">💰</span>
-                      <span className="text-2xl font-bold text-white">
-                        {user.credits.toLocaleString()}
-                      </span>
-                      <span className="text-gray-400">credits</span>
-                    </div>
-                  </div>
-                  <Button 
-                    variant="primary" 
-                    size="lg" 
-                    onClick={() => navigate('/account')}
-                    className="liquid-button hover-lift"
-                  >
-                    💳 Add Credits
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <Button variant="primary" size="lg" className="liquid-button hover-lift">
-                    🎮 Get Started
-                  </Button>
-                  <Button variant="outline" size="lg" className="morph-hover">
-                    📖 Learn More
-                  </Button>
-                </div>
-              )}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link to="/packs">
+                <Button size="lg" className="bg-gradient-primary hover:opacity-90 text-white px-8 py-4 text-lg">
+                  Start Opening Packs
+                </Button>
+              </Link>
+              <Link to="/about">
+                <Button variant="outline" size="lg" className="px-8 py-4 text-lg">
+                  Learn More
+                </Button>
+              </Link>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
-        {/* Top Cards Carousel */}
-        <section className="slide-up">
-          {isLoadingData && !hasData ? (
-            <CarouselSkeleton />
-          ) : (
-            <div className="fade-in">
-              <TopCardsCarousel 
-                cards={topCards} 
-                loading={isLoadingData}
-              />
-            </div>
-          )}
-        </section>
-
-        {/* All Packs Grid */}
-        <section className="slide-up">
-          <div className="text-center mb-8 fade-in">
-            <h2 className="text-3xl font-bold text-white mb-4 text-reveal">
-              <span>🎴</span> <span>All</span> <span>Card</span> <span>Packs</span>
+      {/* Featured Pack Section */}
+      <section className="py-16 px-4">
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              Featured Pack
             </h2>
-            <p className="text-gray-400">Choose your adventure - each pack contains unique surprises!</p>
-          </div>
-          
-          {isLoadingData && !hasData ? (
-            <PackGridSkeleton count={8} />
-          ) : (
-            <div className="stagger-children">
-              <PackGrid 
-                packs={availablePacks}
-                onPackPurchase={handlePackPurchase}
-                loading={isLoadingData}
-              />
+            
+            <div className="max-w-md mx-auto">
+              {featuredPacks.length > 0 && (
+                <PackCard
+                  pack={featuredPacks[0]}
+                  onBuy={handleBuyPack}
+                />
+              )}
             </div>
-          )}
-        </section>
-      </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Top Cards Showcase */}
+      <section className="py-16 px-4 bg-card/30">
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              Current Top Cards
+            </h2>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
+              {topCards.map((card, index) => (
+                <motion.div
+                  key={card.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.1 * index }}
+                >
+                  <CardDisplay card={card} size="md" />
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 px-4">
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+              Why Choose HobbyHunter?
+            </h2>
+            
+            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <div className="text-center p-6 rounded-lg bg-gradient-card">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-primary rounded-full flex items-center justify-center">
+                  <span className="text-2xl">🎯</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Safe Environment</h3>
+                <p className="text-muted-foreground">
+                  No real-world violence or disputes. Enjoy the thrill in a controlled, safe space.
+                </p>
+              </div>
+              
+              <div className="text-center p-6 rounded-lg bg-gradient-card">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-rare rounded-full flex items-center justify-center">
+                  <span className="text-2xl">✨</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Real Pack Experience</h3>
+                <p className="text-muted-foreground">
+                  Authentic opening animations and the same dopamine rush as physical packs.
+                </p>
+              </div>
+              
+              <div className="text-center p-6 rounded-lg bg-gradient-card">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-mythic rounded-full flex items-center justify-center">
+                  <span className="text-2xl">💎</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Physical Options</h3>
+                <p className="text-muted-foreground">
+                  Convert virtual cards to physical ones or credits. Your choice, your control.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 };

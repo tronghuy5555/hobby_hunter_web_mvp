@@ -1,105 +1,176 @@
-import React from 'react';
+import { motion } from 'framer-motion';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
-const AboutPage: React.FC = () => {
+const AboutPage = () => {
+  const teamMembers = [
+    {
+      name: 'Jess',
+      role: 'Product Designer',
+      description: 'Crafting beautiful and intuitive user experiences for HobbyHunter.',
+    },
+    {
+      name: 'Thai',
+      role: 'Fullstack Developer',
+      description: 'Building robust backend systems and ensuring seamless functionality.',
+    },
+    {
+      name: 'Huy',
+      role: 'Frontend Developer',
+      description: 'Creating smooth animations and responsive interfaces.',
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-background-primary py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-4">About HobbyHunter</h1>
-          <p className="text-gray-400">
-            Learn more about our platform and mission
+    <div className="min-h-screen bg-gradient-hero py-12 px-4">
+      <div className="container mx-auto max-w-4xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-16"
+        >
+          <Badge className="mb-6 bg-gradient-primary text-white px-4 py-2">
+            Our Mission
+          </Badge>
+          
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            About <span className="bg-gradient-primary bg-clip-text text-transparent">HobbyHunter</span>
+          </h1>
+          
+          <p className="text-xl text-muted-foreground leading-relaxed">
+            We're on a mission to revolutionize the trading card experience by providing a safe, 
+            controlled environment for card enthusiasts to enjoy the thrill of pack opening without 
+            the risks associated with the unregulated physical market.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="space-y-8">
-          {/* Mission Section */}
-          <div className="bg-background-secondary rounded-xl p-8 border border-gray-700">
-            <h2 className="text-2xl font-bold text-white mb-4">Our Mission</h2>
-            <p className="text-gray-300 text-lg leading-relaxed">
-              HobbyHunter bridges the gap between digital and physical collectibles. 
-              We believe that the excitement of opening card packs should be accessible anywhere, 
-              while still providing the option to own physical cards.
-            </p>
-          </div>
-
-          {/* How It Works */}
-          <div className="bg-background-secondary rounded-xl p-8 border border-gray-700">
-            <h2 className="text-2xl font-bold text-white mb-6">How It Works</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
-                  💳
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Purchase Credits</h3>
-                <p className="text-gray-400">
-                  Buy credits securely with PayPal to purchase card packs
+        {/* Mission Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="mb-16"
+        >
+          <Card className="p-8 bg-gradient-card border-border">
+            <h2 className="text-3xl font-bold mb-6 text-center">Why HobbyHunter Exists</h2>
+            
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-xl font-semibold mb-4 text-accent">The Problem</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  The current trading card market is largely unregulated and has led to real-world 
+                  violence and disputes over rare collectibles. People fight over cards, stores get 
+                  robbed, and the hobby loses its joy.
                 </p>
               </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
-                  📦
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Open Packs</h3>
-                <p className="text-gray-400">
-                  Experience the thrill with our animated pack opening system
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
-                  🚚
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Ship Physical Cards</h3>
-                <p className="text-gray-400">
-                  Convert your digital cards into high-quality physical collectibles
+              
+              <div>
+                <h3 className="text-xl font-semibold mb-4 text-accent">Our Solution</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  HobbyHunter provides all the excitement of opening card packs in a virtual, 
+                  safe environment. You get the dopamine hit, the thrill of discovery, and the 
+                  option to convert to physical cards—all without the risks.
                 </p>
               </div>
             </div>
-          </div>
+          </Card>
+        </motion.section>
 
-          {/* Features */}
-          <div className="bg-background-secondary rounded-xl p-8 border border-gray-700">
-            <h2 className="text-2xl font-bold text-white mb-6">Features</h2>
-            <ul className="space-y-4 text-gray-300">
-              <li className="flex items-start space-x-3">
-                <span className="text-green-400 text-xl">✓</span>
-                <span>Animated pack opening with skip options</span>
-              </li>
-              <li className="flex items-start space-x-3">
-                <span className="text-green-400 text-xl">✓</span>
-                <span>Card collection with expiry countdown system</span>
-              </li>
-              <li className="flex items-start space-x-3">
-                <span className="text-green-400 text-xl">✓</span>
-                <span>Secure PayPal payment integration</span>
-              </li>
-              <li className="flex items-start space-x-3">
-                <span className="text-green-400 text-xl">✓</span>
-                <span>Physical card shipping service</span>
-              </li>
-              <li className="flex items-start space-x-3">
-                <span className="text-green-400 text-xl">✓</span>
-                <span>Mobile-optimized responsive design</span>
-              </li>
-              <li className="flex items-start space-x-3">
-                <span className="text-green-400 text-xl">✓</span>
-                <span>Real-time notifications and updates</span>
-              </li>
-            </ul>
+        {/* Features Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="mb-16"
+        >
+          <h2 className="text-3xl font-bold mb-8 text-center">How It Works</h2>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="p-6 bg-gradient-card border-border text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-primary rounded-full flex items-center justify-center">
+                <span className="text-2xl">🛒</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-3">Buy Virtual Packs</h3>
+              <p className="text-sm text-muted-foreground">
+                Purchase card packs safely online with PayPal or credits
+              </p>
+            </Card>
+            
+            <Card className="p-6 bg-gradient-card border-border text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-rare rounded-full flex items-center justify-center">
+                <span className="text-2xl">✨</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-3">Experience Opening</h3>
+              <p className="text-sm text-muted-foreground">
+                Enjoy realistic pack opening animations with card reveals
+              </p>
+            </Card>
+            
+            <Card className="p-6 bg-gradient-card border-border text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-mythic rounded-full flex items-center justify-center">
+                <span className="text-2xl">📱</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-3">Manage Collection</h3>
+              <p className="text-sm text-muted-foreground">
+                Track your cards with automatic expiration and credit conversion
+              </p>
+            </Card>
+            
+            <Card className="p-6 bg-gradient-card border-border text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-primary rounded-full flex items-center justify-center">
+                <span className="text-2xl">📦</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-3">Ship Physical Cards</h3>
+              <p className="text-sm text-muted-foreground">
+                Convert virtual cards to physical ones or credits as you choose
+              </p>
+            </Card>
           </div>
+        </motion.section>
 
-          {/* Contact */}
-          <div className="bg-background-secondary rounded-xl p-8 border border-gray-700">
-            <h2 className="text-2xl font-bold text-white mb-4">Contact Us</h2>
-            <p className="text-gray-300 mb-4">
-              Have questions or feedback? We'd love to hear from you!
-            </p>
-            <div className="space-y-2 text-gray-400">
-              <p>📧 Email: support@hobbyhunter.com</p>
-              <p>💬 Discord: HobbyHunter Community</p>
-              <p>🐦 Twitter: @HobbyHunterApp</p>
+        {/* Trust Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+        >
+          <Card className="p-8 bg-gradient-card border-border text-center">
+            <h2 className="text-3xl font-bold mb-6">Built on Trust</h2>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              <div>
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-primary rounded-full flex items-center justify-center">
+                  <span className="text-2xl">🔒</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-3">Secure Payments</h3>
+                <p className="text-sm text-muted-foreground">
+                  We use PayPal for secure transactions and never store credit card details
+                </p>
+              </div>
+              
+              <div>
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-rare rounded-full flex items-center justify-center">
+                  <span className="text-2xl">📊</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-3">Real Pricing</h3>
+                <p className="text-sm text-muted-foreground">
+                  Card values updated daily from MTGGoldfish for accurate market pricing
+                </p>
+              </div>
+              
+              <div>
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-mythic rounded-full flex items-center justify-center">
+                  <span className="text-2xl">✅</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-3">Verified Inventory</h3>
+                <p className="text-sm text-muted-foreground">
+                  QC system ensures physical cards match digital ones through hash detection
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
+          </Card>
+        </motion.section>
       </div>
     </div>
   );
