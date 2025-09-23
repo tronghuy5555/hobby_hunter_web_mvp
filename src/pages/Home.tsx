@@ -61,7 +61,7 @@ const Home = () => {
                 >
                   <Package className="h-16 w-16 text-primary-foreground" />
                 </motion.div>
-                <h2 className="text-2xl font-bold">Opening your pack...</h2>
+                <h2 className="text-2xl font-bold text-foreground">Opening your pack...</h2>
                 <p className="text-muted-foreground">Get ready for some amazing cards!</p>
               </div>
             </div>
@@ -89,10 +89,10 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-6xl font-bold text-foreground">
               Open Digital Card Packs
             </h1>
-            <p className="text-xl text-muted-foreground mt-4 max-w-2xl mx-auto">
+            <p className="text-xl text-foreground/70 mt-4 max-w-2xl mx-auto">
               Experience the thrill of opening trading card packs with real-world value and physical shipping options
             </p>
           </motion.div>
@@ -117,7 +117,7 @@ const Home = () => {
                   <div className="w-12 h-12 bg-muted-foreground/20 rounded"></div>
                 </div>
               </div>
-              <p className="font-semibold text-foreground">We're paying $100 for Sephiroth today!</p>
+              <p className="font-semibold text-gray-900 dark:text-gray-100">We're paying $100 for Sephiroth today!</p>
             </motion.div>
 
             {/* Recent Big Pulls */}
@@ -127,30 +127,30 @@ const Home = () => {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="card-container p-6"
             >
-              <h3 className="font-semibold text-foreground mb-4">Recent Big Pulls</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Recent Big Pulls</h3>
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-muted rounded flex-shrink-0"></div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground text-sm">1999 Upper Deck #156 Ken Griffey Jr (PSA 8 NM-MT)</p>
-                    <p className="text-xs text-muted-foreground">Baseball Starter Pack</p>
-                    <p className="text-xs text-muted-foreground">3 seconds ago</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">1999 Upper Deck #156 Ken Griffey Jr (PSA 8 NM-MT)</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Baseball Starter Pack</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">3 seconds ago</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-muted rounded flex-shrink-0"></div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground text-sm">1999 Upper Deck #156 Ken Griffey Jr (PSA 8 NM-MT)</p>
-                    <p className="text-xs text-muted-foreground">Baseball Starter Pack</p>
-                    <p className="text-xs text-muted-foreground">3 seconds ago</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">1999 Upper Deck #156 Ken Griffey Jr (PSA 8 NM-MT)</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Baseball Starter Pack</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">3 seconds ago</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-muted rounded flex-shrink-0"></div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground text-sm">1999 Upper Deck #156 Ken Griffey Jr (PSA 8 NM-MT)</p>
-                    <p className="text-xs text-muted-foreground">Baseball Starter Pack</p>
-                    <p className="text-xs text-muted-foreground">3 seconds ago</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">1999 Upper Deck #156 Ken Griffey Jr (PSA 8 NM-MT)</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Baseball Starter Pack</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">3 seconds ago</p>
                   </div>
                 </div>
               </div>
@@ -163,37 +163,37 @@ const Home = () => {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="card-container p-6"
             >
-              <h3 className="font-semibold text-foreground mb-4">Top 5 Buybacks</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-4">Top 5 Buybacks</h3>
               <div className="space-y-2">
-                <div className="grid grid-cols-3 gap-2 text-xs font-medium text-muted-foreground pb-2 border-b border-border">
+                <div className="grid grid-cols-3 gap-2 text-xs font-medium text-gray-600 dark:text-gray-400 pb-2 border-b border-border">
                   <span>Card Name</span>
                   <span>Buyback Price ($)</span>
                   <span>Multiplier</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-sm">
-                  <span className="text-foreground">Sephiroth</span>
-                  <span className="text-foreground">$100</span>
-                  <span className="text-foreground">10x</span>
+                  <span className="text-gray-900 dark:text-gray-100">Sephiroth</span>
+                  <span className="text-gray-900 dark:text-gray-100">$100</span>
+                  <span className="text-gray-900 dark:text-gray-100">10x</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-sm">
-                  <span className="text-foreground">Cloud Strife</span>
-                  <span className="text-foreground">$80</span>
-                  <span className="text-foreground">8x</span>
+                  <span className="text-gray-900 dark:text-gray-100">Cloud Strife</span>
+                  <span className="text-gray-900 dark:text-gray-100">$80</span>
+                  <span className="text-gray-900 dark:text-gray-100">8x</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-sm">
-                  <span className="text-foreground">Rare Summon</span>
-                  <span className="text-foreground">$60</span>
-                  <span className="text-foreground">6x</span>
+                  <span className="text-gray-900 dark:text-gray-100">Rare Summon</span>
+                  <span className="text-gray-900 dark:text-gray-100">$60</span>
+                  <span className="text-gray-900 dark:text-gray-100">6x</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-sm">
-                  <span className="text-foreground">Chocobo</span>
-                  <span className="text-foreground">$40</span>
-                  <span className="text-foreground">4x</span>
+                  <span className="text-gray-900 dark:text-gray-100">Chocobo</span>
+                  <span className="text-gray-900 dark:text-gray-100">$40</span>
+                  <span className="text-gray-900 dark:text-gray-100">4x</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-sm">
-                  <span className="text-foreground">Materia</span>
-                  <span className="text-foreground">$25</span>
-                  <span className="text-foreground">2.5x</span>
+                  <span className="text-gray-900 dark:text-gray-100">Materia</span>
+                  <span className="text-gray-900 dark:text-gray-100">$25</span>
+                  <span className="text-gray-900 dark:text-gray-100">2.5x</span>
                 </div>
               </div>
             </motion.div>
@@ -226,8 +226,8 @@ const Home = () => {
                 <div className="w-32 h-32 bg-muted rounded-lg mx-auto flex items-center justify-center">
                   <div className="w-16 h-16 bg-muted-foreground/20 rounded"></div>
                 </div>
-                <h3 className="font-semibold text-foreground">More Packs Coming Soon!</h3>
-                <p className="text-sm text-muted-foreground">Stay tuned for more exciting card packs and collections.</p>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">More Packs Coming Soon!</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Stay tuned for more exciting card packs and collections.</p>
               </div>
             </motion.div>
           </div>
@@ -240,13 +240,13 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
           >
-            <h2 className="text-3xl font-bold text-center text-foreground mb-8">Potential hits</h2>
+            <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-gray-100 mb-8">Potential hits</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {mockTopCards.map((card, index) => (
                 <CardDisplay key={card.id} card={card} index={index} />
               ))}
             </div>
-            <p className="text-center text-sm text-muted-foreground mt-4">
+            <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
               *Prices updated daily from MTGGoldfish / TCGPlayer
             </p>
           </motion.div>
@@ -259,28 +259,28 @@ const Home = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
-            <h2 className="text-3xl font-bold text-center text-foreground mb-12">Why Choose Us</h2>
+            <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-gray-100 mb-12">Why Choose Us</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="card-container p-6 text-center">
                 <Shield className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">Secure Payments</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Secure Payments</h3>
+                <p className="text-gray-600 dark:text-gray-400">
                   All transactions are processed through PayPal, ensuring your payments are safe, encrypted, and protected by industry standard security.
                 </p>
               </div>
               
               <div className="card-container p-6 text-center">
                 <Zap className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">Instant Buyback</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Instant Buyback</h3>
+                <p className="text-gray-600 dark:text-gray-400">
                   Sell your cards back to the platform instantly and receive credit added to your account balance right away — no delays, no waiting.
                 </p>
               </div>
               
               <div className="card-container p-6 text-center">
                 <Package className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">Ship Your Cards</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Ship Your Cards</h3>
+                <p className="text-gray-600 dark:text-gray-400">
                   Prefer to keep your rare pulls? Request physical shipping and get your cards securely delivered to your doorstep.
                 </p>
               </div>
@@ -299,7 +299,7 @@ const Home = () => {
               </div>
             </div>
             
-            <div className="flex items-center space-x-6 text-sm text-muted-foreground">
+            <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-400">
               <Button variant="link" className="p-0 h-auto" onClick={() => navigate('/cards')}>
                 CARDS
               </Button>
@@ -309,10 +309,10 @@ const Home = () => {
             </div>
           </div>
           
-          <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
+          <div className="mt-8 pt-8 border-t border-border text-center text-sm text-gray-600 dark:text-gray-400">
             <p>Copyright 2025. HobbyHunter. All Rights Reserved</p>
             <div className="flex items-center justify-center space-x-4 mt-4">
-              <p>📧 abc@gmail.com</p>
+              <p>📧 hobbyhunter@gmail.com</p>
               <div className="flex space-x-2">
                 <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                   <span className="text-xs">𝕏</span>
