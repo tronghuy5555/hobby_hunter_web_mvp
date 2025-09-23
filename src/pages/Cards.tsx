@@ -1,34 +1,39 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import CardDisplay from '@/components/CardDisplay';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useAppStore, mockTopCards } from '@/lib/store';
+import { useCardsController } from '@/controller/CardsController';
 import { Package, Clock, ArrowRight } from 'lucide-react';
 
 const Cards = () => {
-  const { user, isAuthenticated } = useAppStore();
-  const [selectedCards, setSelectedCards] = useState<string[]>([]);
+  const {
+    // State
+    selectedCards,
+    hasSelectedCards,
+    selectedCardsCount,
+    
+    // Data getters
+    getCardsData,
+    getCardExpiryInfo,
+    getCardCreditValue,
+    getTopCards,
+    getAuthState,
+    
+    // Actions
+    handleCardToggle,
+    handleShipCards,
+    navigateToBuyPacks,
+    navigateToAuth,
+    
+    // Validations
+    canShipCards,
+    getShippingValidationMessage
+  } = useCardsController();
 
-  // Mock user cards for demo
-  const userCards = isAuthenticated && user ? user.cards : [];
-  const hasCards = userCards.length > 0;
-
-  const handleCardToggle = (cardId: string) => {
-    setSelectedCards(prev => 
-      prev.includes(cardId) 
-        ? prev.filter(id => id !== cardId)
-        : [...prev, cardId]
-    );
-  };
-
-  const handleShipCards = () => {
-    // In a real app, this would create a shipping request
-    console.log('Shipping cards:', selectedCards);
-    // Reset selection
-    setSelectedCards([]);
-  };
+  const { isAuthenticated, user } = getAuthState();
+  const { userCards, hasCards, isCardSelected } = getCardsData();
+  const topCards = getTopCards();
 
   if (!isAuthenticated) {
     return (
@@ -46,7 +51,7 @@ const Cards = () => {
               <p className="text-muted-foreground max-w-md mx-auto">
                 Sign in to view your card collection and manage your pulls
               </p>
-              <Button className="btn-primary">
+              <Button className="btn-primary" onClick={navigateToAuth}>
                 Sign In to Continue
               </Button>
             </motion.div>
@@ -80,7 +85,7 @@ const Cards = () => {
               <p className="text-muted-foreground max-w-md mx-auto">
                 You haven't opened any packs yet. Start by purchasing and opening your first pack!
               </p>
-              <Button className="btn-primary" onClick={() => window.location.href = '/'}>
+              <Button className="btn-primary" onClick={navigateToBuyPacks}>
                 Buy Your First Pack
               </Button>
             </motion.div>
@@ -93,13 +98,15 @@ const Cards = () => {
                 <h2 className="text-xl font-semibold">
                   Your Collection ({userCards.length} cards)
                 </h2>
-                {selectedCards.length > 0 && (
+                {hasSelectedCards && (
                   <Button 
                     onClick={handleShipCards}
+                    disabled={!canShipCards()}
                     className="btn-primary flex items-center gap-2"
+                    title={getShippingValidationMessage() || undefined}
                   >
                     <Package className="h-4 w-4" />
-                    Ship {selectedCards.length} Cards
+                    Ship {selectedCardsCount} Cards
                   </Button>
                 )}
               </div>
@@ -115,7 +122,7 @@ const Cards = () => {
                   >
                     <div 
                       className={`cursor-pointer transition-all ${
-                        selectedCards.includes(card.id) 
+                        isCardSelected(card.id) 
                           ? 'ring-2 ring-primary ring-offset-2' 
                           : ''
                       }`}
@@ -128,10 +135,10 @@ const Cards = () => {
                     <div className="mt-2 space-y-1">
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" />
-                        29 days left
+                        {getCardExpiryInfo(card.id).daysLeft} days left
                       </div>
                       <p className="text-xs font-medium text-primary">
-                        ${card.price} credit value
+                        ${getCardCreditValue(card)} credit value
                       </p>
                     </div>
                   </motion.div>
@@ -165,7 +172,7 @@ const Cards = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {mockTopCards.map((card, index) => (
+            {topCards.map((card, index) => (
               <CardDisplay key={card.id} card={card} index={index} />
             ))}
           </div>

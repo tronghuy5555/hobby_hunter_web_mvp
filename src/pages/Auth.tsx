@@ -1,103 +1,46 @@
-import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { useAppStore } from '@/lib/store';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuthController } from '@/controller/AuthController';
 import { ArrowLeft } from 'lucide-react';
 
-type AuthStep = 'initial' | 'signup' | 'login' | 'verify' | 'setup';
-
 const Auth = () => {
-  const [searchParams] = useSearchParams();
-  const [step, setStep] = useState<AuthStep>('initial');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('');
-  const [shippingAddress, setShippingAddress] = useState('');
-  const { setUser } = useAppStore();
-  const navigate = useNavigate();
+  const {
+    // State
+    step,
+    email,
+    password,
+    verificationCode,
+    paymentMethod,
+    shippingAddress,
+    isLoading,
+    error,
 
-  // Handle direct sign up navigation
-  useEffect(() => {
-    const mode = searchParams.get('mode');
-    if (mode === 'signup') {
-      setStep('signup');
-    } else if (mode === 'login') {
-      setStep('initial');
-    }
-  }, [searchParams]);
+    // Actions
+    handleEmailSubmit,
+    handleSignup,
+    handleLogin,
+    handleVerification,
+    handleGoogleSignIn,
+    handleSetupComplete,
+    handleGoBack,
+    handleGoHome,
 
-  // Mock user database
-  const existingUsers = ['john@example.com', 'user@test.com'];
+    // Field updates
+    updateEmail,
+    updatePassword,
+    updateVerificationCode,
+    updatePaymentMethod,
+    updateShippingAddress,
 
-  const handleEmailSubmit = () => {
-    if (existingUsers.includes(email)) {
-      setStep('login');
-    } else {
-      setStep('signup');
-    }
-  };
+    // Computed values
+    getFormValidation,
+    getStepInfo
+  } = useAuthController();
 
-  const handleSignup = () => {
-    // Simulate sending verification code
-    setStep('verify');
-  };
-
-  const handleLogin = () => {
-    // Mock login
-    const mockUser = {
-      id: '1',
-      email,
-      credits: 100,
-      cards: [],
-    };
-    setUser(mockUser);
-    navigate('/');
-  };
-
-  const handleVerification = () => {
-    if (verificationCode === '123456') {
-      setStep('setup');
-    }
-  };
-
-  const handleSetupComplete = (skip = false) => {
-    const mockUser = {
-      id: '1',
-      email,
-      credits: 100,
-      cards: [],
-    };
-    setUser(mockUser);
-    navigate('/');
-  };
-
-  const handleGoogleSignIn = () => {
-    // Mock Google sign in
-    const mockUser = {
-      id: '2',
-      email: 'google@user.com',
-      credits: 100,
-      cards: [],
-    };
-    setUser(mockUser);
-    navigate('/');
-  };
-
-  const handleGoBack = () => {
-    if (step === 'signup' || step === 'login') {
-      setStep('initial');
-    } else {
-      navigate('/');
-    }
-  };
-
-  const handleGoHome = () => {
-    navigate('/');
-  };
+  const { isValid, canSubmit } = getFormValidation();
+  const { title, description } = getStepInfo();
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -107,6 +50,7 @@ const Auth = () => {
         size="sm"
         onClick={step === 'initial' ? handleGoHome : handleGoBack}
         className="fixed top-4 left-4 z-50 p-3 h-12 w-12 bg-background/80 backdrop-blur-sm hover:bg-background border"
+        disabled={isLoading}
       >
         <ArrowLeft className="h-5 w-5" />
       </Button>
@@ -117,14 +61,19 @@ const Auth = () => {
             HOBBY HUNTER
           </div>
           <h1 className="text-2xl font-semibold text-foreground mb-2">
-            Welcome to Hobby Hunter
+            {title}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {step === 'setup' ? 'Complete your profile' : 'Log in or sign up'}
+            {description}
           </p>
         </CardHeader>
 
         <CardContent className="space-y-4">
+          {error && (
+            <div className="text-sm text-red-500 bg-red-50 border border-red-200 rounded p-2">
+              {error}
+            </div>
+          )}
           {step === 'initial' && (
             <>
               <div className="space-y-2">
@@ -133,17 +82,18 @@ const Auth = () => {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => updateEmail(e.target.value)}
                   placeholder="Enter your email"
+                  disabled={isLoading}
                 />
               </div>
 
               <Button 
                 onClick={handleEmailSubmit} 
                 className="w-full"
-                disabled={!email}
+                disabled={!canSubmit}
               >
-                Log in
+                {isLoading ? 'Please wait...' : 'Log in'}
               </Button>
 
               <div className="relative">
@@ -159,6 +109,7 @@ const Auth = () => {
                 variant="outline" 
                 onClick={handleGoogleSignIn}
                 className="w-full"
+                disabled={isLoading}
               >
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -166,7 +117,7 @@ const Auth = () => {
                   <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                   <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                Continue with Google
+                {isLoading ? 'Signing in...' : 'Continue with Google'}
               </Button>
 
               <p className="text-xs text-center text-muted-foreground">
@@ -189,8 +140,9 @@ const Auth = () => {
                   id="email-signup"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => updateEmail(e.target.value)}
                   placeholder="Enter your email"
+                  disabled={isLoading}
                 />
               </div>
 
@@ -200,17 +152,18 @@ const Auth = () => {
                   id="password"
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => updatePassword(e.target.value)}
                   placeholder="Create a password"
+                  disabled={isLoading}
                 />
               </div>
 
               <Button 
                 onClick={handleSignup} 
                 className="w-full"
-                disabled={!email || !password}
+                disabled={!canSubmit}
               >
-                Sign up
+                {isLoading ? 'Creating account...' : 'Sign up'}
               </Button>
 
               <p className="text-xs text-center text-muted-foreground">
@@ -240,8 +193,9 @@ const Auth = () => {
                   id="password-login"
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => updatePassword(e.target.value)}
                   placeholder="Enter your password"
+                  disabled={isLoading}
                 />
               </div>
 
@@ -254,9 +208,9 @@ const Auth = () => {
               <Button 
                 onClick={handleLogin} 
                 className="w-full"
-                disabled={!password}
+                disabled={!canSubmit}
               >
-                Log in
+                {isLoading ? 'Signing in...' : 'Log in'}
               </Button>
             </>
           )}
@@ -276,8 +230,9 @@ const Auth = () => {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => setStep('signup')}
+                    onClick={handleGoBack}
                     className="text-primary"
+                    disabled={isLoading}
                   >
                     change
                   </Button>
@@ -295,17 +250,18 @@ const Auth = () => {
                 <Input
                   id="code"
                   value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value)}
+                  onChange={(e) => updateVerificationCode(e.target.value)}
                   placeholder="Enter verification code"
+                  disabled={isLoading}
                 />
               </div>
 
               <Button 
                 onClick={handleVerification} 
                 className="w-full"
-                disabled={!verificationCode}
+                disabled={!canSubmit}
               >
-                Sign up
+                {isLoading ? 'Verifying...' : 'Sign up'}
               </Button>
 
               <p className="text-xs text-center text-muted-foreground">
@@ -324,8 +280,9 @@ const Auth = () => {
                   <Input
                     id="payment"
                     value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    onChange={(e) => updatePaymentMethod(e.target.value)}
                     placeholder="Add payment method (optional)"
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -334,8 +291,9 @@ const Auth = () => {
                   <Input
                     id="shipping"
                     value={shippingAddress}
-                    onChange={(e) => setShippingAddress(e.target.value)}
+                    onChange={(e) => updateShippingAddress(e.target.value)}
                     placeholder="Add shipping address (optional)"
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -344,14 +302,16 @@ const Auth = () => {
                     variant="outline" 
                     onClick={() => handleSetupComplete(true)}
                     className="flex-1"
+                    disabled={isLoading}
                   >
-                    Skip
+                    {isLoading ? 'Setting up...' : 'Skip'}
                   </Button>
                   <Button 
                     onClick={() => handleSetupComplete(false)}
                     className="flex-1"
+                    disabled={isLoading}
                   >
-                    Finish
+                    {isLoading ? 'Setting up...' : 'Finish'}
                   </Button>
                 </div>
               </div>
