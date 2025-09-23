@@ -8,51 +8,50 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 222 25% 8%;
-    --foreground: 0 0% 95%;
+    --background: 249 250 251;
+    --foreground: 17 24 39;
 
-    --card: 222 20% 12%;
-    --card-foreground: 0 0% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 17 24 39;
 
-    --popover: 222 20% 15%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 17 24 39;
 
-    --primary: 270 100% 70%;
+    --primary: 239 68% 68%;
     --primary-foreground: 0 0% 100%;
+    --primary-glow: 244 114% 85%;
 
-    --secondary: 220 15% 20%;
-    --secondary-foreground: 0 0% 85%;
+    --secondary: 241 100% 97%;
+    --secondary-foreground: 239 68% 68%;
 
-    --muted: 220 15% 18%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 248 250 252;
+    --muted-foreground: 100 116 139;
 
-    --accent: 45 100% 60%;
-    --accent-foreground: 0 0% 10%;
+    --accent: 255 146% 76%;
+    --accent-foreground: 17 24 39;
 
-    --destructive: 0 65% 55%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 25%;
-    --input: 220 15% 20%;
-    --ring: 270 100% 70%;
+    --border: 226 238 248;
+    --input: 226 238 248;
+    --ring: 239 68% 68%;
 
-    /* Custom design tokens */
-    --rare-gold: 45 100% 60%;
-    --mythic-orange: 25 100% 65%;
-    --legendary-purple: 270 100% 70%;
-    --holographic: 280 100% 80%;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 45 93% 47%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Custom gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-card: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(248,250,252,0.8));
+    --gradient-rare: linear-gradient(135deg, #f59e0b, #f97316);
     
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(270 100% 70%), hsl(280 100% 80%));
-    --gradient-rare: linear-gradient(135deg, hsl(45 100% 60%), hsl(35 100% 65%));
-    --gradient-mythic: linear-gradient(135deg, hsl(25 100% 65%), hsl(15 100% 70%));
-    --gradient-card: linear-gradient(135deg, hsl(222 20% 12%), hsl(220 15% 20%));
-    --gradient-hero: linear-gradient(135deg, hsl(222 25% 8%) 0%, hsl(270 100% 70% / 0.1) 100%);
-    
-    /* Shadows */
-    --shadow-card: 0 10px 30px -10px hsl(270 100% 70% / 0.3);
-    --shadow-rare: 0 0 30px hsl(45 100% 60% / 0.4);
-    --shadow-mythic: 0 0 40px hsl(25 100% 65% / 0.5);
+    /* Custom shadows */
+    --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.3);
 
     --radius: 0.5rem;
 
@@ -74,33 +73,50 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 17 24 39;
+    --foreground: 248 250 252;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 30 41 59;
+    --card-foreground: 248 250 252;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 30 41 59;
+    --popover-foreground: 248 250 252;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 239 68% 68%;
+    --primary-foreground: 17 24 39;
+    --primary-glow: 244 114% 85%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 30 58 88;
+    --secondary-foreground: 248 250 252;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 30 58 88;
+    --muted-foreground: 148 163 184;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 255 146% 76%;
+    --accent-foreground: 17 24 39;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 248 250 252;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 30 58 88;
+    --input: 30 58 88;
+    --ring: 239 68% 68%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 248 250 252;
+
+    --warning: 45 93% 47%;
+    --warning-foreground: 17 24 39;
+
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-card: linear-gradient(145deg, rgba(51,65,85,0.9), rgba(30,41,59,0.8));
+    --gradient-rare: linear-gradient(135deg, #f59e0b, #f97316);
+    
+    /* Dark mode shadows */
+    --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.5);
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -118,54 +134,92 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
   }
 }
 
 @layer utilities {
-  .bg-gradient-primary {
+  .gradient-primary {
     background: var(--gradient-primary);
   }
   
-  .bg-gradient-rare {
-    background: var(--gradient-rare);
-  }
-  
-  .bg-gradient-mythic {
-    background: var(--gradient-mythic);
-  }
-  
-  .bg-gradient-card {
+  .gradient-card {
     background: var(--gradient-card);
   }
   
-  .bg-gradient-hero {
-    background: var(--gradient-hero);
+  .gradient-rare {
+    background: var(--gradient-rare);
   }
   
   .shadow-card {
     box-shadow: var(--shadow-card);
   }
   
-  .shadow-rare {
-    box-shadow: var(--shadow-rare);
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
   }
   
-  .shadow-mythic {
-    box-shadow: var(--shadow-mythic);
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
   }
   
-  .card-hover {
-    @apply transition-all duration-300 hover:scale-105 hover:shadow-card;
+  .animate-pack-open {
+    animation: packOpen 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
-  .pack-reveal {
-    @apply animate-pulse;
+  .animate-card-reveal {
+    animation: cardReveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
   }
 }
 
 @layer components {
-  .hero-gradient {
-    background: linear-gradient(135deg, hsl(222 25% 8%) 0%, hsl(270 100% 70% / 0.1) 100%);
+  .btn-primary {
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-card hover:shadow-elevated hover:shadow-glow;
   }
+  
+  .btn-secondary {
+    @apply bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-card;
+  }
+  
+  .card-container {
+    @apply bg-card border border-border rounded-xl shadow-card hover:shadow-elevated transition-all duration-300;
+  }
+  
+  .pack-card {
+    @apply card-container p-6 hover:scale-[1.02] cursor-pointer;
+  }
+  
+  .rarity-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .rarity-rare {
+    @apply rarity-badge gradient-rare text-white;
+  }
+}
+
+@keyframes packOpen {
+  0% { transform: scale(1) rotateY(0deg); opacity: 1; }
+  50% { transform: scale(1.1) rotateY(90deg); opacity: 0.7; }
+  100% { transform: scale(1) rotateY(180deg); opacity: 1; }
+}
+
+@keyframes cardReveal {
+  0% { 
+    transform: scale(0.8) translateY(20px) rotateX(-15deg); 
+    opacity: 0; 
+  }
+  100% { 
+    transform: scale(1) translateY(0) rotateX(0deg); 
+    opacity: 1; 
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }

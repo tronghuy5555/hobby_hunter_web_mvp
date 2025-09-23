@@ -1,93 +1,55 @@
-import { Card } from '@/components/ui/card';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Pack } from '@/store/gameStore';
-import { motion } from 'framer-motion';
-import heroPackImage from '@/assets/hero-pack.jpg';
+import { Pack } from '@/lib/store';
+import packImage from '@/assets/pack-ff-gathering.jpg';
 
 interface PackCardProps {
   pack: Pack;
-  onBuy: (pack: Pack) => void;
+  onBuyNow: () => void;
+  className?: string;
 }
 
-const PackCard = ({ pack, onBuy }: PackCardProps) => {
-  const getRarityColor = (rarity: string) => {
-    switch (rarity) {
-      case 'legendary': return 'bg-legendary text-white';
-      case 'mythic': return 'bg-mythic text-white';
-      case 'rare': return 'bg-rare text-black';
-      case 'uncommon': return 'bg-secondary text-secondary-foreground';
-      default: return 'bg-muted text-muted-foreground';
-    }
-  };
-
+const PackCard = ({ pack, onBuyNow, className = '' }: PackCardProps) => {
   return (
     <motion.div
-      whileHover={{ y: -5 }}
+      className={`pack-card ${className}`}
+      whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
     >
-      <Card className="overflow-hidden bg-gradient-card border-border card-hover">
-        <div className="relative aspect-[4/3]">
-          <img
-            src={heroPackImage}
-            alt={pack.name}
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground">
-            ${pack.price}
+      <div className="relative">
+        <img
+          src={packImage}
+          alt={pack.name}
+          className="w-full h-48 object-cover rounded-lg mb-4"
+        />
+        {pack.guaranteed && (
+          <Badge className="absolute top-2 left-2 rarity-rare">
+            Guaranteed {pack.guaranteed}
           </Badge>
-        </div>
+        )}
+      </div>
+      
+      <div className="space-y-3">
+        <h3 className="text-lg font-semibold text-card-foreground">
+          {pack.name}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Each pack contains {pack.cardCount} cards
+        </p>
         
-        <div className="p-6">
-          <h3 className="text-xl font-bold mb-2">{pack.name}</h3>
-          <p className="text-muted-foreground text-sm mb-4">{pack.description}</p>
-          
-          <div className="space-y-3">
-            <div className="text-sm">
-              <span className="text-muted-foreground">Average Value:</span>
-              <span className="ml-2 font-semibold text-accent">
-                ${pack.averageValue.toFixed(2)}
-              </span>
-            </div>
-            
-            <div>
-              <h4 className="text-sm font-semibold mb-2 text-muted-foreground">
-                THIS IS WHAT YOU CAN GET:
-              </h4>
-              <div className="space-y-1">
-                {pack.topCards.slice(0, 5).map((card) => (
-                  <div
-                    key={card.id}
-                    className="flex items-center justify-between text-xs"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <Badge
-                        variant="outline"
-                        className={`text-xs ${getRarityColor(card.rarity)}`}
-                      >
-                        {card.rarity}
-                      </Badge>
-                      <span className="truncate">{card.name}</span>
-                    </div>
-                    <span className="font-semibold text-accent">
-                      ${card.price.toFixed(2)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <Button
-              onClick={() => onBuy(pack)}
-              className="w-full bg-gradient-primary hover:opacity-90 text-white font-semibold"
-              size="lg"
-            >
-              Buy Pack
-            </Button>
-          </div>
+        <div className="flex items-center justify-between">
+          <span className="text-2xl font-bold text-card-foreground">
+            ${pack.price}
+          </span>
+          <Button 
+            onClick={onBuyNow}
+            className="btn-primary"
+          >
+            BUY NOW
+          </Button>
         </div>
-      </Card>
+      </div>
     </motion.div>
   );
 };
