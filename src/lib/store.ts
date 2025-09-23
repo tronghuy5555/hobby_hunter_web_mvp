@@ -53,6 +53,51 @@ export const mockPacks: Pack[] = [
     cardCount: 15,
     guaranteed: '1 rare or better',
   },
+  {
+    id: '2',
+    name: 'Pokemon (Battle Styles)',
+    description: 'Each pack contains 11 cards',
+    price: 4,
+    image: 'pack-pokemon-battle.jpg',
+    cardCount: 11,
+    guaranteed: '1 rare or better',
+  },
+  {
+    id: '3',
+    name: 'Yu-Gi-Oh! (Legendary Duelists)',
+    description: 'Each pack contains 5 cards',
+    price: 8,
+    image: 'pack-yugioh-legendary.jpg',
+    cardCount: 5,
+    guaranteed: '1 super rare or better',
+  },
+  {
+    id: '4',
+    name: 'Magic: The Gathering (Dominaria)',
+    description: 'Each pack contains 15 cards',
+    price: 15,
+    image: 'pack-mtg-dominaria.jpg',
+    cardCount: 15,
+    guaranteed: '1 rare or mythic rare',
+  },
+  {
+    id: '5',
+    name: 'Dragon Ball Super (Series 1)',
+    description: 'Each pack contains 12 cards',
+    price: 6,
+    image: 'pack-dbs-series1.jpg',
+    cardCount: 12,
+    guaranteed: '1 rare or better',
+  },
+  {
+    id: '6',
+    name: 'One Piece (Romance Dawn)',
+    description: 'Each pack contains 12 cards',
+    price: 7,
+    image: 'pack-onepiece-romance.jpg',
+    cardCount: 12,
+    guaranteed: '1 rare or better',
+  },
 ];
 
 export const mockTopCards: Card[] = [
@@ -80,6 +125,30 @@ export const mockTopCards: Card[] = [
     image: 'card-bahamut.jpg',
     finish: 'foil',
   },
+  {
+    id: '1',
+    name: 'Sephiroth',
+    rarity: 'legendary',
+    price: 100,
+    image: 'card-sephiroth.jpg',
+    finish: 'foil',
+  },
+  {
+    id: '2',
+    name: 'Cloud Strife',
+    rarity: 'epic',
+    price: 80,
+    image: 'card-cloud.jpg',
+    finish: 'reverse-foil',
+  },
+  {
+    id: '3',
+    name: 'Bahamut',
+    rarity: 'legendary',
+    price: 120,
+    image: 'card-bahamut.jpg',
+    finish: 'foil',
+  }
 ];
 
 export const useAppStore = create<AppState>((set, get) => ({

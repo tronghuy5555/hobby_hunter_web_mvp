@@ -21,7 +21,7 @@ const PackCard = ({ pack, onBuyNow, className = '' }: PackCardProps) => {
         <img
           src={packImage}
           alt={pack.name}
-          className="w-full h-48 object-cover rounded-lg mb-4"
+          className="w-full h-72 object-cover rounded-lg mb-4"
         />
         {pack.guaranteed && (
           <Badge className="absolute top-2 left-2 rarity-rare">

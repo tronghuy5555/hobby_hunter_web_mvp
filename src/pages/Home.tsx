@@ -16,9 +16,11 @@ const Home = () => {
   const { setCurrentPack, openedCards, isOpening, openPack, setIsOpening, clearOpenedCards } = useAppStore();
   const [isOpeningPack, setIsOpeningPack] = useState(false);
 
-  const handleBuyPack = () => {
+  const handleBuyPack = (packId: string) => {
     // In a real app, this would handle payment
-    const pack = mockPacks[0];
+    const pack = mockPacks.find(p => p.id === packId);
+    if (!pack) return;
+    
     setCurrentPack(pack);
     setIsOpening(true);
     setIsOpeningPack(true);
@@ -82,22 +84,6 @@ const Home = () => {
       <Header />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Hero Section */}
-        <section className="text-center py-12 space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground">
-              Open Digital Card Packs
-            </h1>
-            <p className="text-xl text-foreground/70 mt-4 max-w-2xl mx-auto">
-              Experience the thrill of opening trading card packs with real-world value and physical shipping options
-            </p>
-          </motion.div>
-        </section>
-
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-12">
           {/* Left Column - Hot Buyback & Recent Pulls */}
@@ -200,7 +186,7 @@ const Home = () => {
           </div>
 
           {/* Center Column - Featured Pack */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -208,42 +194,23 @@ const Home = () => {
             >
               <PackCard 
                 pack={mockPacks[0]} 
-                onBuyNow={handleBuyPack}
-                className="transform hover:scale-105 transition-transform"
+                onBuyNow={() => handleBuyPack(mockPacks[0].id)}
+                className="transform hover:scale-100 transition-transform"
               />
             </motion.div>
-          </div>
-
-          {/* Right Column - Additional Content */}
-          <div className="lg:col-span-1">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="card-container p-6 h-full flex items-center justify-center"
-            >
-              <div className="text-center space-y-4">
-                <div className="w-32 h-32 bg-muted rounded-lg mx-auto flex items-center justify-center">
-                  <div className="w-16 h-16 bg-muted-foreground/20 rounded"></div>
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">More Packs Coming Soon!</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Stay tuned for more exciting card packs and collections.</p>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Potential Hits */}
+          {/* Potential Hits */}
         <section className="py-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
           >
-            <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-gray-100 mb-8">Potential hits</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <h2 className="text-3xl font-bold text-left text-gray-900 dark:text-gray-100 mb-8">Potential hits</h2>
+            <div className="flex overflow-x-auto gap-6 pb-4">
               {mockTopCards.map((card, index) => (
-                <CardDisplay key={card.id} card={card} index={index} />
+                <div key={card.id} className="flex-shrink-0 min-w-[300px]">
+                  <CardDisplay card={card} index={index} />
+                </div>
               ))}
             </div>
             <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
@@ -287,9 +254,9 @@ const Home = () => {
             </div>
           </motion.div>
         </section>
-      </main>
 
-      {/* Footer */}
+
+        {/* Footer */}
       <footer className="bg-card border-t border-border mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
@@ -325,6 +292,12 @@ const Home = () => {
           </div>
         </div>
       </footer>
+          </div>
+        </div>
+
+        
+      </main>
+
     </div>
   );
 };
