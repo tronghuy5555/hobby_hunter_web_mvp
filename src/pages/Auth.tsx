@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useAppStore } from '@/lib/store';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 type AuthStep = 'initial' | 'signup' | 'login' | 'verify' | 'setup';
 
@@ -86,8 +87,30 @@ const Auth = () => {
     navigate('/');
   };
 
+  const handleGoBack = () => {
+    if (step === 'signup' || step === 'login') {
+      setStep('initial');
+    } else {
+      navigate('/');
+    }
+  };
+
+  const handleGoHome = () => {
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      {/* Back Button - Top Left of Screen */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={step === 'initial' ? handleGoHome : handleGoBack}
+        className="fixed top-4 left-4 z-50 p-3 h-12 w-12 bg-background/80 backdrop-blur-sm hover:bg-background border"
+      >
+        <ArrowLeft className="h-5 w-5" />
+      </Button>
+      
       <Card className="w-full max-w-md">
         <CardHeader className="text-center pb-6">
           <div className="mx-auto mb-4 px-3 py-1 bg-muted rounded text-sm font-medium text-muted-foreground">
