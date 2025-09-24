@@ -25,6 +25,9 @@ export interface User {
   email: string;
   credits: number;
   cards: Card[];
+  fullName?: string;
+  phoneNumber?: string;
+  address?: string;
 }
 
 interface AppState {
