@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore, Pack, mockPacks } from '@/lib/store';
-import { useHomeController } from '@/controller/HomeController';
 
 export interface PackDetailControllerProps {
   packId: string;
@@ -14,8 +13,6 @@ export const usePackDetailController = ({ packId }: PackDetailControllerProps) =
   const [isOpeningPack, setIsOpeningPack] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const { handleBuyPack } = useHomeController({ setIsOpeningPack });
 
   // Load pack data on mount or when packId changes
   useEffect(() => {
@@ -68,11 +65,8 @@ export const usePackDetailController = ({ packId }: PackDetailControllerProps) =
     // Clear any previous errors
     setError(null);
     
-    // Trigger pack purchase
-    handleBuyPack(pack.id);
-    
-    // Navigate to pack opening experience
-    navigate('/');
+    // Navigate to checkout page with the selected pack
+    navigate('/checkout', { state: { packId: pack.id } });
   };
 
   // Handle back navigation

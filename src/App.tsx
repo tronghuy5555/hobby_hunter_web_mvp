@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import MyCards from "./pages/MyCards";
 import MyAccount from "./pages/MyAccount";
 import PackDetail from "./pages/PackDetail";
+import CheckOutPack from "./pages/CheckOutPack";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const AppContent = () => {
       <Route path="/my-cards" element={<MyCards />} />
       <Route path="/my-account" element={<MyAccount />} />
       <Route path="/pack/:packId" element={<PackDetail />} />
+      <Route path="/checkout" element={<CheckOutPack />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>

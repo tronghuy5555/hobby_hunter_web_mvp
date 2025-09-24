@@ -1,4 +1,5 @@
 import { useAppStore, mockPacks, mockTopCards, Card } from '@/lib/store';
+import { useNavigate } from 'react-router-dom';
 import chocoboCard from '@/assets/card-chocobo.jpg';
 import moogleCard from '@/assets/card-moogle.jpg';
 
@@ -7,28 +8,17 @@ export interface HomeControllerProps {
 }
 
 export const useHomeController = ({ setIsOpeningPack }: HomeControllerProps) => {
-  const { setCurrentPack, openedCards, isOpening, openPack, setIsOpening, clearOpenedCards } = useAppStore();
+  const { setCurrentPack, openedCards, isOpening, openPack, setIsOpening, clearOpenedCards, isAuthenticated } = useAppStore();
+  const navigate = useNavigate();
 
   const handleBuyPack = (packId: string) => {
-    // In a real app, this would handle payment
-    const pack = mockPacks.find(p => p.id === packId);
-    if (!pack) return;
+    if (!isAuthenticated) {
+      navigate('/auth?mode=login');
+      return;
+    }
     
-    setCurrentPack(pack);
-    setIsOpening(true);
-    setIsOpeningPack(true);
-    
-    // Simulate pack opening with mock cards
-    setTimeout(() => {
-      const mockCards: Card[] = [
-        { id: 'opened-1', name: 'Chocobo Rider', rarity: 'common', price: 2, image: chocoboCard },
-        { id: 'opened-2', name: 'Fire Spell', rarity: 'common', price: 1.5, image: '/placeholder-card.jpg' },
-        { id: 'opened-3', name: 'Materia Shard', rarity: 'common', price: 3, image: '/placeholder-card.jpg' },
-        mockTopCards[1], // Cloud Strife
-        { id: 'opened-4', name: 'Moogle Helper', rarity: 'rare', price: 15, image: moogleCard },
-      ];
-      openPack(mockCards);
-    }, 2000);
+    // Navigate to checkout page with the selected pack
+    navigate('/checkout', { state: { packId } });
   };
 
   const handlePackOpeningComplete = () => {
