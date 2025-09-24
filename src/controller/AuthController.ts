@@ -146,7 +146,32 @@ export const useAuthController = (_props?: AuthControllerProps) => {
         id: '1',
         email,
         credits: 100,
-        cards: [],
+        cards: [
+          {
+            id: '1',
+            name: 'Sephiroth',
+            rarity: 'legendary',
+            price: 100,
+            image: 'card-sephiroth.jpg',
+            finish: 'foil',
+          },
+          {
+            id: '2',
+            name: 'Cloud Strife',
+            rarity: 'epic',
+            price: 80,
+            image: 'card-cloud.jpg',
+            finish: 'reverse-foil',
+          },
+          {
+            id: '3',
+            name: 'Bahamut',
+            rarity: 'legendary',
+            price: 120,
+            image: 'card-bahamut.jpg',
+            finish: 'foil',
+          },
+        ],
       };
 
       setUser(mockUser);

@@ -1,12 +1,19 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useAppStore } from '@/lib/store';
-import { User, ShoppingCart } from 'lucide-react';
+import { User, ShoppingCart, CreditCard, LogOut, ChevronDown } from 'lucide-react';
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated, setUser } = useAppStore();
+  const { user, isAuthenticated, logout } = useAppStore();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -56,14 +63,55 @@ const Header = () => {
                 <span className="text-sm font-medium">
                   Credits: ${user.credits}
                 </span>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setUser(null)}
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  Account
-                </Button>
+                
+                {/* User Dropdown Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="flex items-center space-x-2"
+                    >
+                      <User className="h-4 w-4" />
+                      <span className="hidden sm:inline">Paul Xing</span>
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  
+                  <DropdownMenuContent 
+                    align="end" 
+                    className="w-48 border-2 border-gray-500 bg-white shadow-lg"
+                  >
+                    <DropdownMenuItem 
+                      onClick={() => navigate('/my-cards')}
+                      className="flex items-center space-x-2 cursor-pointer"
+                    >
+                      <CreditCard className="h-4 w-4" />
+                      <span>My cards</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem 
+                      onClick={() => navigate('/my-account')}
+                      className="flex items-center space-x-2 cursor-pointer"
+                    >
+                      <User className="h-4 w-4" />
+                      <span>My account</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator />
+                    
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        logout();
+                        navigate('/');
+                      }}
+                      className="flex items-center space-x-2 cursor-pointer text-red-600 focus:text-red-600"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ) : (
               <div className="flex items-center space-x-2">

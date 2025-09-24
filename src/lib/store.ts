@@ -35,6 +35,7 @@ interface AppState {
   
   // Actions
   setUser: (user: User | null) => void;
+  logout: () => void;
   setCurrentPack: (pack: Pack) => void;
   openPack: (cards: Card[]) => void;
   setIsOpening: (opening: boolean) => void;
@@ -159,6 +160,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   isOpening: false,
 
   setUser: (user) => set({ user, isAuthenticated: !!user }),
+  
+  logout: () => set({ 
+    user: null, 
+    isAuthenticated: false,
+    currentPack: null,
+    openedCards: [],
+    isOpening: false 
+  }),
   
   setCurrentPack: (pack) => set({ currentPack: pack }),
   
