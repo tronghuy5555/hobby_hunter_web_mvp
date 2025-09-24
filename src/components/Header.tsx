@@ -80,7 +80,7 @@ const Header = () => {
                   
                   <DropdownMenuContent 
                     align="end" 
-                    className="w-48 border-2 border-gray-500 bg-white shadow-lg"
+                    className="w-48 border-2 border-gray-200 bg-white shadow-lg"
                   >
                     <DropdownMenuItem 
                       onClick={() => navigate('/my-cards')}

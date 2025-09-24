@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface Card {
   id: string;
@@ -152,40 +153,53 @@ export const mockTopCards: Card[] = [
   }
 ];
 
-export const useAppStore = create<AppState>((set, get) => ({
-  user: null,
-  isAuthenticated: false,
-  currentPack: null,
-  openedCards: [],
-  isOpening: false,
+export const useAppStore = create<AppState>()((
+  persist(
+    (set, get) => ({
+      user: null,
+      isAuthenticated: false,
+      currentPack: null,
+      openedCards: [],
+      isOpening: false,
 
-  setUser: (user) => set({ user, isAuthenticated: !!user }),
-  
-  logout: () => set({ 
-    user: null, 
-    isAuthenticated: false,
-    currentPack: null,
-    openedCards: [],
-    isOpening: false 
-  }),
-  
-  setCurrentPack: (pack) => set({ currentPack: pack }),
-  
-  openPack: (cards) => set({ openedCards: cards, isOpening: false }),
-  
-  setIsOpening: (opening) => set({ isOpening: opening }),
-  
-  addCardsToCollection: (cards) => {
-    const { user } = get();
-    if (user) {
-      set({
-        user: {
-          ...user,
-          cards: [...user.cards, ...cards],
-        },
-      });
+      setUser: (user) => set({ user, isAuthenticated: !!user }),
+      
+      logout: () => set({ 
+        user: null, 
+        isAuthenticated: false,
+        currentPack: null,
+        openedCards: [],
+        isOpening: false 
+      }),
+      
+      setCurrentPack: (pack) => set({ currentPack: pack }),
+      
+      openPack: (cards) => set({ openedCards: cards, isOpening: false }),
+      
+      setIsOpening: (opening) => set({ isOpening: opening }),
+      
+      addCardsToCollection: (cards) => {
+        const { user } = get();
+        if (user) {
+          set({
+            user: {
+              ...user,
+              cards: [...user.cards, ...cards],
+            },
+          });
+        }
+      },
+      
+      clearOpenedCards: () => set({ openedCards: [] }),
+    }),
+    {
+      name: 'hobby-hunter-storage', // name of the localStorage key
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+        // Don't persist temporary states like currentPack, openedCards, isOpening
+      }),
     }
-  },
-  
-  clearOpenedCards: () => set({ openedCards: [] }),
-}));
+  )
+));
