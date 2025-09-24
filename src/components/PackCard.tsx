@@ -2,20 +2,36 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Pack } from '@/lib/store';
+import { useNavigate } from 'react-router-dom';
 import packImage from '@/assets/pack-ff-gathering.jpg';
 
 interface PackCardProps {
   pack: Pack;
   onBuyNow: () => void;
   className?: string;
+  showDetailsOnClick?: boolean;
 }
 
-const PackCard = ({ pack, onBuyNow, className = '' }: PackCardProps) => {
+const PackCard = ({ pack, onBuyNow, className = '', showDetailsOnClick = true }: PackCardProps) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    if (showDetailsOnClick) {
+      navigate(`/pack/${pack.id}`);
+    }
+  };
+
+  const handleBuyClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when clicking buy button
+    onBuyNow();
+  };
+
   return (
     <motion.div
-      className={`pack-card ${className}`}
+      className={`pack-card ${className} ${showDetailsOnClick ? 'cursor-pointer' : ''}`}
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
+      onClick={handleCardClick}
     >
       <div className="relative">
         <img
@@ -43,7 +59,7 @@ const PackCard = ({ pack, onBuyNow, className = '' }: PackCardProps) => {
             ${pack.price}
           </span>
           <Button 
-            onClick={onBuyNow}
+            onClick={handleBuyClick}
             className="btn-primary"
           >
             BUY NOW
