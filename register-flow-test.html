@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Flow Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+        }
+        .test-section.success {
+            border-color: #4caf50;
+            background: #f1f8e9;
+        }
+        .test-section.error {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+        .test-section.pending {
+            border-color: #ff9800;
+            background: #fff3e0;
+        }
+        h1 { color: #333; text-align: center; }
+        h2 { color: #555; margin-top: 0; }
+        h3 { color: #666; }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input.error {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+        button {
+            background: #2196f3;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #1976d2;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .api-response {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .test-description {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #1565c0;
+        }
+        .field-error {
+            color: #f44336;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .test-results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Registration Flow API Test</h1>
+        <p style="text-align: center; color: #666;">
+            Test the complete registration flow with real API endpoints
+        </p>
+
+        <!-- Test 1: Registration -->
+        <div class="test-section" id="test-registration">
+            <h2>📝 Test 1: User Registration</h2>
+            <div class="test-description">
+                Tests the POST /auth/register endpoint with email, username, and password.
+                Validates field requirements and API response structure.
+            </div>
+
+            <div class="form-group">
+                <label for="reg-email">Email *</label>
+                <input type="email" id="reg-email" placeholder="Enter email address" value="test@example.com">
+                <div class="field-error" id="reg-email-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="reg-username">Username *</label>
+                <input type="text" id="reg-username" placeholder="Enter username" value="testuser123">
+                <div class="field-error" id="reg-username-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="reg-password">Password *</label>
+                <input type="password" id="reg-password" placeholder="Enter password" value="password123">
+                <div class="field-error" id="reg-password-error"></div>
+            </div>
+
+            <button onclick="testRegistration()">Register User</button>
+            <button onclick="testRegistrationValidation()">Test Validation</button>
+
+            <div id="registration-status"></div>
+            <div id="registration-response" class="api-response" style="display: none;"></div>
+        </div>
+
+        <!-- Test 2: Email Verification -->
+        <div class="test-section" id="test-verification">
+            <h2>✉️ Test 2: Email Verification</h2>
+            <div class="test-description">
+                Tests the POST /auth/verify endpoint with email and verification code.
+                Requires a user to be registered first.
+            </div>
+
+            <div class="form-group">
+                <label for="verify-email">Email *</label>
+                <input type="email" id="verify-email" placeholder="Email from registration" value="test@example.com" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="verify-code">Verification Code *</label>
+                <input type="text" id="verify-code" placeholder="Enter 6-digit code" maxlength="6" value="123456">
+                <div class="field-error" id="verify-code-error"></div>
+            </div>
+
+            <button onclick="testVerification()">Verify Email</button>
+            <button onclick="testVerificationValidation()">Test Invalid Code</button>
+
+            <div id="verification-status"></div>
+            <div id="verification-response" class="api-response" style="display: none;"></div>
+        </div>
+
+        <!-- Test 3: Error Handling -->
+        <div class="test-section" id="test-errors">
+            <h2>⚠️ Test 3: Error Handling</h2>
+            <div class="test-description">
+                Tests various error scenarios: duplicate email, invalid username, network errors.
+            </div>
+
+            <button onclick="testDuplicateEmail()">Test Duplicate Email</button>
+            <button onclick="testInvalidUsername()">Test Invalid Username</button>
+            <button onclick="testWeakPassword()">Test Weak Password</button>
+            <button onclick="testInvalidVerificationCode()">Test Invalid Code</button>
+
+            <div id="error-status"></div>
+            <div id="error-response" class="api-response" style="display: none;"></div>
+        </div>
+
+        <!-- Test Results Summary -->
+        <div class="test-results" id="test-summary">
+            <h3>🎯 Test Results Summary</h3>
+            <ul id="results-list">
+                <li>Registration Test: <span id="reg-result">Not started</span></li>
+                <li>Verification Test: <span id="verify-result">Not started</span></li>
+                <li>Error Handling Test: <span id="error-result">Not started</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'https://hunterna-api-production.up.railway.app';
+        const API_TIMEOUT = 30000;
+
+        // Helper function to make API requests
+        async function makeApiRequest(endpoint, method = 'GET', data = null) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                timeout: API_TIMEOUT,
+            };
+
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            console.log(`Making ${method} request to ${url}`, data);
+
+            try {
+                const response = await fetch(url, options);
+                const responseData = await response.json();
+                
+                console.log('API Response:', responseData);
+                
+                return {
+                    success: response.ok,
+                    status: response.status,
+                    data: responseData,
+                };
+            } catch (error) {
+                console.error('API Request failed:', error);
+                return {
+                    success: false,
+                    error: error.message,
+                };
+            }
+        }
+
+        // Validation helpers
+        function validateEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+
+        function validateUsername(username) {
+            return username.length >= 3 && username.length <= 20 && /^[a-zA-Z0-9_]+$/.test(username);
+        }
+
+        function validatePassword(password) {
+            return password.length >= 6;
+        }
+
+        function validateVerificationCode(code) {
+            return /^\d{6}$/.test(code);
+        }
+
+        // Display helpers
+        function showStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function showResponse(elementId, data) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.textContent = JSON.stringify(data, null, 2);
+        }
+
+        function showFieldError(fieldId, message) {
+            const element = document.getElementById(fieldId + '-error');
+            element.textContent = message;
+            const input = document.getElementById(fieldId.replace('-error', ''));
+            if (message) {
+                input.classList.add('error');
+            } else {
+                input.classList.remove('error');
+            }
+        }
+
+        function clearFieldErrors() {
+            const errorElements = document.querySelectorAll('.field-error');
+            errorElements.forEach(el => el.textContent = '');
+            const inputElements = document.querySelectorAll('input.error');
+            inputElements.forEach(el => el.classList.remove('error'));
+        }
+
+        function updateTestResult(testId, result) {
+            document.getElementById(testId).textContent = result;
+        }
+
+        // Test 1: Registration
+        async function testRegistration() {
+            clearFieldErrors();
+            showStatus('registration-status', 'Testing user registration...', 'info');
+
+            const email = document.getElementById('reg-email').value;
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+
+            // Client-side validation
+            let hasErrors = false;
+            if (!validateEmail(email)) {
+                showFieldError('reg-email', 'Please enter a valid email address');
+                hasErrors = true;
+            }
+            if (!validateUsername(username)) {
+                showFieldError('reg-username', 'Username must be 3-20 characters and contain only letters, numbers, and underscores');
+                hasErrors = true;
+            }
+            if (!validatePassword(password)) {
+                showFieldError('reg-password', 'Password must be at least 6 characters long');
+                hasErrors = true;
+            }
+
+            if (hasErrors) {
+                showStatus('registration-status', 'Please fix validation errors', 'error');
+                return;
+            }
+
+            const registrationData = {
+                email,
+                username,
+                password,
+                agreeToTerms: true
+            };
+
+            const response = await makeApiRequest('/auth/register', 'POST', registrationData);
+            
+            showResponse('registration-response', response);
+
+            if (response.success) {
+                showStatus('registration-status', '✅ Registration successful!', 'success');
+                updateTestResult('reg-result', '✅ Passed');
+                
+                // Update verification form with registered email
+                document.getElementById('verify-email').value = email;
+                
+                document.getElementById('test-registration').classList.add('success');
+            } else {
+                showStatus('registration-status', `❌ Registration failed: ${response.data?.error?.message || response.error}`, 'error');
+                updateTestResult('reg-result', '❌ Failed');
+                document.getElementById('test-registration').classList.add('error');
+            }
+        }
+
+        async function testRegistrationValidation() {
+            clearFieldErrors();
+            showStatus('registration-status', 'Testing registration validation...', 'info');
+
+            const invalidData = {
+                email: 'invalid-email',
+                username: 'ab', // Too short
+                password: '123', // Too short
+                agreeToTerms: true
+            };
+
+            const response = await makeApiRequest('/auth/register', 'POST', invalidData);
+            showResponse('registration-response', response);
+
+            if (!response.success && response.data?.error) {
+                showStatus('registration-status', '✅ Validation working correctly', 'success');
+            } else {
+                showStatus('registration-status', '❌ Validation not working as expected', 'error');
+            }
+        }
+
+        // Test 2: Verification
+        async function testVerification() {
+            clearFieldErrors();
+            showStatus('verification-status', 'Testing email verification...', 'info');
+
+            const email = document.getElementById('verify-email').value;
+            const code = document.getElementById('verify-code').value;
+
+            if (!validateVerificationCode(code)) {
+                showFieldError('verify-code', 'Verification code must be 6 digits');
+                showStatus('verification-status', 'Please fix validation errors', 'error');
+                return;
+            }
+
+            const verificationData = {
+                email,
+                code
+            };
+
+            const response = await makeApiRequest('/auth/verify', 'POST', verificationData);
+            showResponse('verification-response', response);
+
+            if (response.success) {
+                showStatus('verification-status', '✅ Email verification successful!', 'success');
+                updateTestResult('verify-result', '✅ Passed');
+                document.getElementById('test-verification').classList.add('success');
+            } else {
+                showStatus('verification-status', `❌ Verification failed: ${response.data?.error?.message || response.error}`, 'error');
+                updateTestResult('verify-result', '❌ Failed');
+                document.getElementById('test-verification').classList.add('error');
+            }
+        }
+
+        async function testVerificationValidation() {
+            clearFieldErrors();
+            showStatus('verification-status', 'Testing invalid verification code...', 'info');
+
+            const email = document.getElementById('verify-email').value;
+            const invalidCode = '000000';
+
+            const verificationData = {
+                email,
+                code: invalidCode
+            };
+
+            const response = await makeApiRequest('/auth/verify', 'POST', verificationData);
+            showResponse('verification-response', response);
+
+            if (!response.success && response.data?.error) {
+                showStatus('verification-status', '✅ Invalid code handling working correctly', 'success');
+            } else {
+                showStatus('verification-status', '❌ Invalid code handling not working as expected', 'error');
+            }
+        }
+
+        // Test 3: Error Handling
+        async function testDuplicateEmail() {
+            showStatus('error-status', 'Testing duplicate email error...', 'info');
+
+            const duplicateData = {
+                email: document.getElementById('reg-email').value, // Use same email
+                username: 'newuser123',
+                password: 'password123',
+                agreeToTerms: true
+            };
+
+            const response = await makeApiRequest('/auth/register', 'POST', duplicateData);
+            showResponse('error-response', response);
+
+            if (!response.success && (response.data?.error?.code === 'EMAIL_ALREADY_EXISTS' || 
+                                      response.data?.error?.code === 'USER_EXISTS')) {
+                showStatus('error-status', '✅ Duplicate email error handled correctly', 'success');
+                updateTestResult('error-result', '✅ Passed');
+            } else {
+                showStatus('error-status', '❌ Duplicate email error not handled correctly', 'error');
+                updateTestResult('error-result', '❌ Failed');
+            }
+        }
+
+        async function testInvalidUsername() {
+            showStatus('error-status', 'Testing invalid username error...', 'info');
+
+            const invalidData = {
+                email: 'newtest@example.com',
+                username: 'a!@#$%', // Invalid characters
+                password: 'password123',
+                agreeToTerms: true
+            };
+
+            const response = await makeApiRequest('/auth/register', 'POST', invalidData);
+            showResponse('error-response', response);
+
+            if (!response.success && response.data?.error) {
+                showStatus('error-status', '✅ Invalid username error handled correctly', 'success');
+            } else {
+                showStatus('error-status', '❌ Invalid username error not handled correctly', 'error');
+            }
+        }
+
+        async function testWeakPassword() {
+            showStatus('error-status', 'Testing weak password error...', 'info');
+
+            const invalidData = {
+                email: 'anothertest@example.com',
+                username: 'validuser',
+                password: '123', // Too short
+                agreeToTerms: true
+            };
+
+            const response = await makeApiRequest('/auth/register', 'POST', invalidData);
+            showResponse('error-response', response);
+
+            if (!response.success && response.data?.error) {
+                showStatus('error-status', '✅ Weak password error handled correctly', 'success');
+            } else {
+                showStatus('error-status', '❌ Weak password error not handled correctly', 'error');
+            }
+        }
+
+        async function testInvalidVerificationCode() {
+            showStatus('error-status', 'Testing invalid verification code error...', 'info');
+
+            const invalidData = {
+                email: document.getElementById('verify-email').value,
+                code: 'abc123' // Non-numeric
+            };
+
+            const response = await makeApiRequest('/auth/verify', 'POST', invalidData);
+            showResponse('error-response', response);
+
+            if (!response.success && response.data?.error) {
+                showStatus('error-status', '✅ Invalid verification code error handled correctly', 'success');
+            } else {
+                showStatus('error-status', '❌ Invalid verification code error not handled correctly', 'error');
+            }
+        }
+
+        // Initialize with random test data
+        window.onload = function() {
+            const randomSuffix = Math.floor(Math.random() * 10000);
+            document.getElementById('reg-email').value = `test${randomSuffix}@example.com`;
+            document.getElementById('reg-username').value = `testuser${randomSuffix}`;
+            document.getElementById('verify-email').value = `test${randomSuffix}@example.com`;
+        };
+    </script>
+</body>
+</html>

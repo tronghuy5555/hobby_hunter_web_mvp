@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/lib/store';
 import { userRepository } from '@/services';
-import type { User, AuthCredentials, LoginResponse } from '@/services';
+import type { User, AuthCredentials, LoginResponse, RegisterData, RegisterResponse, VerificationData } from '@/services';
 
 export type AuthStep = 'initial' | 'signup' | 'login' | 'verify' | 'setup';
 
@@ -118,29 +118,89 @@ export const useAuthController = (_props?: AuthControllerProps) => {
 
   // Handle signup
   const handleSignup = async (): Promise<void> => {
-    if (!isValidEmail(email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
+    // Clear previous errors
+    setError(null);
+    setFieldErrors({ email: null, password: null, verificationCode: null });
 
-    if (!isValidPassword(password)) {
-      setError('Password must be at least 6 characters long');
+    // Validate fields before submission
+    const emailError = email ? validateEmail(email) : 'Email is required';
+    const passwordError = password ? validatePassword(password) : 'Password is required';
+
+    if (emailError || passwordError) {
+      setFieldErrors({
+        email: emailError,
+        password: passwordError,
+        verificationCode: null,
+      });
       return;
     }
 
     setIsLoading(true);
-    setError(null);
 
     try {
-      // For now, we'll keep the mock behavior for signup since we only have login endpoint
-      // TODO: Implement actual registration when endpoint is available
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const registerData: RegisterData = {
+        email,
+        password
+      };
       
-      console.log('Verification code sent to:', email);
+      const response = await userRepository.register(registerData);
+      
+      if (!response.success || !response.data) {
+        // Handle specific API errors
+        if (response.error) {
+          switch (response.error.code) {
+            case 'EMAIL_ALREADY_EXISTS':
+            case 'USER_EXISTS':
+              setFieldErrors({
+                email: 'An account with this email already exists.',
+                password: null,
+                verificationCode: null,
+              });
+              break;
+            case 'VALIDATION_ERROR':
+              // Handle field-specific validation errors from API
+              if (response.error.field === 'email') {
+                setFieldErrors({
+                  email: response.error.message,
+                  password: null,
+                  verificationCode: null,
+                });
+              } else {
+                setError(response.error.message || 'Please check your input and try again.');
+              }
+              break;
+            default:
+              setError(response.error.message || 'Registration failed. Please try again.');
+          }
+        } else {
+          setError('Registration failed. Please try again.');
+        }
+        return;
+      }
+
+      const registerResponse: RegisterResponse = response.data;
+      
+      console.log('Registration successful:', registerResponse);
+      console.log('Please check your email for verification code');
+      
+      // Move to verification step
       setStep('verify');
-    } catch (error) {
-      console.error('Signup error:', error);
-      setError('Failed to create account. Please try again.');
+    } catch (error: unknown) {
+      console.error('Registration error:', error);
+      
+      // Handle network errors and other exceptions
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorName = error instanceof Error ? error.name : '';
+      
+      if (errorName === 'TypeError' && errorMessage.includes('fetch')) {
+        setError('Unable to connect to the server. Please check your internet connection and try again.');
+      } else if (errorMessage.includes('409')) {
+        setError('An account with this email already exists.');
+      } else if (errorMessage.includes('timeout')) {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -262,27 +322,92 @@ export const useAuthController = (_props?: AuthControllerProps) => {
 
   // Handle email verification
   const handleVerification = async (): Promise<void> => {
-    if (!verificationCode) {
-      setError('Please enter the verification code');
+    // Clear previous errors
+    setError(null);
+    setFieldErrors({ email: null, password: null, verificationCode: null });
+
+    // Validate verification code before submission
+    const codeError = verificationCode ? validateVerificationCode(verificationCode) : 'Verification code is required';
+
+    if (codeError) {
+      setFieldErrors({
+        email: null,
+        password: null,
+        verificationCode: codeError,
+      });
       return;
     }
 
     setIsLoading(true);
-    setError(null);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const verificationData: VerificationData = {
+        email,
+        code: verificationCode,
+      };
       
-      // Mock verification - accept '123456'
-      if (verificationCode !== '123456') {
-        setError('Invalid verification code. Please try again.');
+      const response = await userRepository.verifyEmail(verificationData);
+      
+      if (!response.success || !response.data) {
+        // Handle specific API errors
+        if (response.error) {
+          switch (response.error.code) {
+            case 'INVALID_CODE':
+            case 'VERIFICATION_FAILED':
+              setFieldErrors({
+                email: null,
+                password: null,
+                verificationCode: 'Invalid verification code. Please try again.',
+              });
+              break;
+            case 'CODE_EXPIRED':
+              setFieldErrors({
+                email: null,
+                password: null,
+                verificationCode: 'Verification code has expired. Please request a new one.',
+              });
+              break;
+            case 'TOO_MANY_ATTEMPTS':
+              setError('Too many verification attempts. Please request a new code.');
+              break;
+            case 'USER_NOT_FOUND':
+              setError('User not found. Please try registering again.');
+              break;
+            default:
+              setError(response.error.message || 'Verification failed. Please try again.');
+          }
+        } else {
+          setError('Verification failed. Please try again.');
+        }
         return;
       }
 
+      // Verification successful - proceed to login or setup
+      console.log('Email verification successful');
+      
+      // For a complete flow, we could automatically log the user in here
+      // or redirect to a success page. For now, go to setup.
       setStep('setup');
-    } catch (error) {
-      setError('Verification failed. Please try again.');
+    } catch (error: unknown) {
+      console.error('Verification error:', error);
+      
+      // Handle network errors and other exceptions
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorName = error instanceof Error ? error.name : '';
+      
+      if (errorName === 'TypeError' && errorMessage.includes('fetch')) {
+        setError('Unable to connect to the server. Please check your internet connection and try again.');
+      } else if (errorMessage.includes('400')) {
+        setFieldErrors({
+          email: null,
+          password: null,
+          verificationCode: 'Invalid verification code format.',
+        });
+      } else if (errorMessage.includes('timeout')) {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -384,6 +509,8 @@ export const useAuthController = (_props?: AuthControllerProps) => {
       setFieldErrors(prev => ({ ...prev, password: null }));
     }
   };
+
+
 
   const updateVerificationCode = (newCode: string): void => {
     setVerificationCode(newCode);
@@ -560,6 +687,7 @@ export const authValidators = {
   verificationCode: (code: string): string | null => {
     if (!code) return 'Verification code is required';
     if (code.length !== 6) return 'Please enter the 6-digit code';
+    if (!/^\d{6}$/.test(code)) return 'Verification code must be 6 digits';
     return null;
   }
 };

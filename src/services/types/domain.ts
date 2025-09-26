@@ -173,10 +173,8 @@ export interface AuthCredentials {
 export interface RegisterData {
   email: string;
   password: string;
-  username: string;
   fullName?: string;
   phoneNumber?: string;
-  agreeToTerms?: boolean;
 }
 
 export interface AuthTokens {

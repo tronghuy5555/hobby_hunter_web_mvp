@@ -36,7 +36,7 @@ import type {
 export class UserRepository extends BaseRepository<User> {
   constructor() {
     super({
-      baseEndpoint: apiEndpoints.users.profile,
+      baseEndpoint: "",
       featureFlag: 'useApiForAuthentication',
       mockFallback: false, // Disable mock fallback for auth endpoints
     });
