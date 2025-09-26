@@ -29,6 +29,11 @@ export const useAuthController = (_props?: AuthControllerProps) => {
   // Loading and error states
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState({
+    email: null as string | null,
+    password: null as string | null,
+    verificationCode: null as string | null,
+  });
 
   // Mock user database - in real app this would be API calls
   const existingUsers = ['john@example.com', 'user@test.com'];
@@ -46,17 +51,38 @@ export const useAuthController = (_props?: AuthControllerProps) => {
   // Clear error when step changes
   useEffect(() => {
     setError(null);
+    setFieldErrors({ email: null, password: null, verificationCode: null });
   }, [step]);
 
-  // Email validation
+  // Basic validation helpers
   const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  // Password validation
   const isValidPassword = (password: string): boolean => {
     return password.length >= 6; // Minimum 6 characters
+  };
+
+  // Email validation with immediate feedback
+  const validateEmail = (email: string): string | null => {
+    if (!email) return null; // Don't show error for empty field initially
+    if (!isValidEmail(email)) return 'Please enter a valid email address';
+    return null;
+  };
+
+  // Password validation with immediate feedback
+  const validatePassword = (password: string): string | null => {
+    if (!password) return null; // Don't show error for empty field initially
+    if (!isValidPassword(password)) return 'Password must be at least 6 characters long';
+    return null;
+  };
+
+  // Verification code validation
+  const validateVerificationCode = (code: string): string | null => {
+    if (!code) return null;
+    if (code.length !== 6) return 'Please enter the 6-digit code';
+    return null;
   };
 
   // Check if user exists
@@ -122,20 +148,60 @@ export const useAuthController = (_props?: AuthControllerProps) => {
 
   // Handle login
   const handleLogin = async (): Promise<void> => {
-    if (!password) {
-      setError('Please enter your password');
+    // Clear previous errors
+    setError(null);
+    setFieldErrors({ email: null, password: null, verificationCode: null });
+
+    // Validate fields before submission
+    const emailError = email ? validateEmail(email) : 'Email is required';
+    const passwordError = password ? validatePassword(password) : 'Password is required';
+
+    if (emailError || passwordError) {
+      setFieldErrors({
+        email: emailError,
+        password: passwordError,
+        verificationCode: null,
+      });
       return;
     }
 
     setIsLoading(true);
-    setError(null);
 
     try {
       const credentials: AuthCredentials = { email, password };
       const response = await userRepository.authenticate(credentials);
       
       if (!response.success || !response.data) {
-        setError('Login failed. Please try again.');
+        // Handle specific API errors
+        if (response.error) {
+          switch (response.error.code) {
+            case 'INVALID_CREDENTIALS':
+            case 'UNAUTHORIZED':
+              setFieldErrors({
+                email: null,
+                password: 'Invalid email or password. Please try again.',
+                verificationCode: null,
+              });
+              break;
+            case 'USER_NOT_FOUND':
+              setFieldErrors({
+                email: 'No account found with this email address.',
+                password: null,
+                verificationCode: null,
+              });
+              break;
+            case 'ACCOUNT_LOCKED':
+              setError('Your account has been temporarily locked. Please contact support.');
+              break;
+            case 'VALIDATION_ERROR':
+              setError(response.error.message || 'Please check your input and try again.');
+              break;
+            default:
+              setError(response.error.message || 'Login failed. Please try again.');
+          }
+        } else {
+          setError('Login failed. Please check your credentials and try again.');
+        }
         return;
       }
 
@@ -169,9 +235,26 @@ export const useAuthController = (_props?: AuthControllerProps) => {
 
       setUser(user);
       navigate('/');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
-      setError('Login failed. Please check your credentials and try again.');
+      
+      // Handle network errors and other exceptions
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorName = error instanceof Error ? error.name : '';
+      
+      if (errorName === 'TypeError' && errorMessage.includes('fetch')) {
+        setError('Unable to connect to the server. Please check your internet connection and try again.');
+      } else if (errorMessage.includes('401')) {
+        setFieldErrors({
+          email: null,
+          password: 'Invalid email or password. Please try again.',
+          verificationCode: null,
+        });
+      } else if (errorMessage.includes('timeout')) {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -275,20 +358,44 @@ export const useAuthController = (_props?: AuthControllerProps) => {
     navigate('/');
   };
 
-  // Form field updates
+  // Form field updates with inline validation
   const updateEmail = (newEmail: string): void => {
     setEmail(newEmail);
     setError(null);
+    
+    // Validate email on change (after user has typed something)
+    if (newEmail.length > 0) {
+      const emailError = validateEmail(newEmail);
+      setFieldErrors(prev => ({ ...prev, email: emailError }));
+    } else {
+      setFieldErrors(prev => ({ ...prev, email: null }));
+    }
   };
 
   const updatePassword = (newPassword: string): void => {
     setPassword(newPassword);
     setError(null);
+    
+    // Validate password on change (after user has typed something)
+    if (newPassword.length > 0) {
+      const passwordError = validatePassword(newPassword);
+      setFieldErrors(prev => ({ ...prev, password: passwordError }));
+    } else {
+      setFieldErrors(prev => ({ ...prev, password: null }));
+    }
   };
 
   const updateVerificationCode = (newCode: string): void => {
     setVerificationCode(newCode);
     setError(null);
+    
+    // Validate verification code on change
+    if (newCode.length > 0) {
+      const codeError = validateVerificationCode(newCode);
+      setFieldErrors(prev => ({ ...prev, verificationCode: codeError }));
+    } else {
+      setFieldErrors(prev => ({ ...prev, verificationCode: null }));
+    }
   };
 
   const updatePaymentMethod = (newPaymentMethod: string): void => {
@@ -299,38 +406,48 @@ export const useAuthController = (_props?: AuthControllerProps) => {
     setShippingAddress(newShippingAddress);
   };
 
-  // Get form validation state
+  // Get form validation state with field-specific errors
   const getFormValidation = () => {
+    const hasEmailError = !!fieldErrors.email;
+    const hasPasswordError = !!fieldErrors.password;
+    const hasCodeError = !!fieldErrors.verificationCode;
+    
     switch (step) {
       case 'initial':
         return {
-          isValid: isValidEmail(email),
-          canSubmit: isValidEmail(email) && !isLoading
+          isValid: isValidEmail(email) && !hasEmailError,
+          canSubmit: isValidEmail(email) && !hasEmailError && !isLoading,
+          hasErrors: hasEmailError
         };
       case 'signup':
         return {
-          isValid: isValidEmail(email) && isValidPassword(password),
-          canSubmit: isValidEmail(email) && isValidPassword(password) && !isLoading
+          isValid: isValidEmail(email) && isValidPassword(password) && !hasEmailError && !hasPasswordError,
+          canSubmit: isValidEmail(email) && isValidPassword(password) && !hasEmailError && !hasPasswordError && !isLoading,
+          hasErrors: hasEmailError || hasPasswordError
         };
       case 'login':
         return {
-          isValid: password.length > 0,
-          canSubmit: password.length > 0 && !isLoading
+          isValid: password.length > 0 && !hasPasswordError,
+          canSubmit: password.length > 0 && !hasPasswordError && !isLoading,
+          hasErrors: hasEmailError || hasPasswordError
         };
       case 'verify':
         return {
-          isValid: verificationCode.length > 0,
-          canSubmit: verificationCode.length > 0 && !isLoading
+          isValid: verificationCode.length > 0 && !hasCodeError,
+          canSubmit: verificationCode.length > 0 && !hasCodeError && !isLoading,
+          hasErrors: hasCodeError
         };
       case 'setup':
         return {
           isValid: true,
-          canSubmit: !isLoading
+          canSubmit: !isLoading,
+          hasErrors: false
         };
       default:
         return {
           isValid: false,
-          canSubmit: false
+          canSubmit: false,
+          hasErrors: false
         };
     }
   };
@@ -381,6 +498,7 @@ export const useAuthController = (_props?: AuthControllerProps) => {
     shippingAddress,
     isLoading,
     error,
+    fieldErrors,
 
     // Actions
     handleEmailSubmit,
@@ -406,7 +524,10 @@ export const useAuthController = (_props?: AuthControllerProps) => {
     // Validation helpers
     isValidEmail,
     isValidPassword,
-    checkUserExists
+    checkUserExists,
+    validateEmail,
+    validatePassword,
+    validateVerificationCode,
   };
 };
 

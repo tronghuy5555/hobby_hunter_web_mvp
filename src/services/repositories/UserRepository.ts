@@ -38,7 +38,7 @@ export class UserRepository extends BaseRepository<User> {
     super({
       baseEndpoint: apiEndpoints.users.profile,
       featureFlag: 'useApiForAuthentication',
-      mockFallback: true,
+      mockFallback: false, // Disable mock fallback for auth endpoints
     });
   }
 
@@ -81,9 +81,7 @@ export class UserRepository extends BaseRepository<User> {
     return this.makeApiCall(
       'POST',
       apiEndpoints.auth.login,
-      credentials,
-      undefined,
-      () => this.getMockAuthData(credentials)
+      credentials
     );
   }
 
@@ -94,9 +92,7 @@ export class UserRepository extends BaseRepository<User> {
     return this.makeApiCall(
       'POST',
       apiEndpoints.auth.register,
-      userData,
-      undefined,
-      () => this.getMockRegisterData(userData)
+      userData
     );
   }
 
@@ -107,9 +103,7 @@ export class UserRepository extends BaseRepository<User> {
     return this.makeApiCall(
       'POST',
       apiEndpoints.auth.verify,
-      verificationData,
-      undefined,
-      () => this.getMockVerifyData(verificationData)
+      verificationData
     );
   }
 
@@ -120,9 +114,7 @@ export class UserRepository extends BaseRepository<User> {
     return this.makeApiCall(
       'POST',
       apiEndpoints.auth.refresh,
-      { refreshToken },
-      undefined,
-      () => this.getMockRefreshData(refreshToken)
+      { refreshToken }
     );
   }
 
@@ -133,9 +125,7 @@ export class UserRepository extends BaseRepository<User> {
     return this.makeApiCall(
       'POST',
       apiEndpoints.auth.logout,
-      {},
-      undefined,
-      () => this.getMockLogoutData()
+      {}
     );
   }
 
@@ -149,8 +139,7 @@ export class UserRepository extends BaseRepository<User> {
       'GET',
       apiEndpoints.users.profile,
       undefined,
-      { userId },
-      () => this.getMockUserProfileData(userId)
+      { userId }
     );
     
     if (response.success && response.data) {
@@ -376,100 +365,7 @@ export class UserRepository extends BaseRepository<User> {
     return RepositoryUtils.createSuccessResponse(undefined, 'User deleted successfully');
   }
 
-  private async getMockUserProfileData(userId: string): Promise<UserProfileApiResponse> {
-    await RepositoryUtils.simulateDelay();
-    
-    const mockProfile: UserProfileApiResponse = {
-      id: userId,
-      username: 'johndoe',
-      account_balance: 150,
-      preferences: {
-        theme: 'auto',
-        soundEnabled: true,
-        animationSpeed: 'normal',
-        vibrationEnabled: true,
-        emailNotifications: true,
-        autoConvertAfterDays: 7,
-      },
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    return mockProfile;
-  }
-
   // ==================== Authentication Mock Data ====================
-
-  private async getMockAuthData(credentials: AuthCredentials): Promise<LoginResponse> {
-    await RepositoryUtils.simulateDelay();
-    
-    // Mock authentication validation
-    if (credentials.password === 'wrong') {
-      throw new Error('Invalid credentials');
-    }
-
-    const mockLoginResponse: LoginResponse = {
-      access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
-      refresh_token: 'mock_refresh_token',
-      user: {
-        id: '1',
-        email: credentials.email,
-        created_at: new Date().toISOString(),
-      },
-    };
-
-    return mockLoginResponse;
-  }
-
-  private async getMockRegisterData(userData: RegisterData): Promise<RegisterResponse> {
-    await RepositoryUtils.simulateDelay();
-    
-    const userId = RepositoryUtils.generateMockId();
-    const createdAt = new Date().toISOString();
-    
-    const registerResponse: RegisterResponse = {
-      user: {
-        id: userId,
-        email: userData.email,
-        created_at: createdAt,
-      },
-      profile: {
-        id: userId,
-        username: userData.username,
-      },
-      message: "User and profile registered successfully. Please login to get access token."
-    };
-
-    return registerResponse;
-  }
-
-  private async getMockVerifyData(verificationData: VerificationData): Promise<{ verified: boolean }> {
-    await RepositoryUtils.simulateDelay();
-    
-    // Mock verification - accept '123456'
-    const verified = verificationData.code === '123456';
-    if (!verified) {
-      throw new Error('Invalid verification code');
-    }
-
-    return { verified };
-  }
-
-  private async getMockRefreshData(refreshToken: string): Promise<AuthTokens> {
-    await RepositoryUtils.simulateDelay();
-    
-    return {
-      access_token: 'new_mock_access_token',
-      refresh_token: 'new_mock_refresh_token',
-      expiresIn: 3600,
-      tokenType: 'Bearer',
-    };
-  }
-
-  private async getMockLogoutData(): Promise<void> {
-    await RepositoryUtils.simulateDelay();
-    // Mock logout - no return value needed
-  }
 
   // ==================== Profile Management Mock Data ====================
 
