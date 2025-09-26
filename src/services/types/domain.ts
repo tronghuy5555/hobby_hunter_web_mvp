@@ -141,9 +141,10 @@ export interface AuthCredentials {
 export interface RegisterData {
   email: string;
   password: string;
+  username: string;
   fullName?: string;
   phoneNumber?: string;
-  agreeToTerms: boolean;
+  agreeToTerms?: boolean;
 }
 
 export interface AuthTokens {
@@ -156,6 +157,35 @@ export interface AuthTokens {
 export interface VerificationData {
   email: string;
   code: string;
+}
+
+/**
+ * User profile interface (separate from User entity)
+ */
+export interface UserProfile {
+  id: string;
+  username: string;
+  fullName?: string;
+  avatar?: string;
+  bio?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Register response interface
+ */
+export interface RegisterResponse {
+  user: {
+    id: string;
+    email: string;
+    created_at: string;
+  };
+  profile: {
+    id: string;
+    username: string;
+  };
+  message: string;
 }
 
 /**
