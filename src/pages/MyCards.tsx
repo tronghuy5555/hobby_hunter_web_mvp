@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import SellCardModal from '@/components/SellCardModal';
 import { useMyCardsController } from '@/controller/MyCardsController';
 
 const MyCards = () => {
@@ -13,6 +14,8 @@ const MyCards = () => {
     activeTab,
     isLoading,
     error,
+    sellModalOpen,
+    selectedCardId,
     
     // Data
     displayCards,
@@ -22,6 +25,8 @@ const MyCards = () => {
     handleTabChange,
     handleSell,
     handleShip,
+    handleSellModalClose,
+    handleSellComplete,
     
     // Utils
     getStatusBadgeConfig,
@@ -162,6 +167,16 @@ const MyCards = () => {
           </div>
         )}
       </main>
+      
+      {/* Sell Card Modal */}
+      {sellModalOpen && selectedCardId && (
+        <SellCardModal
+          cardId={selectedCardId}
+          isOpen={sellModalOpen}
+          onClose={handleSellModalClose}
+          onSellComplete={handleSellComplete}
+        />
+      )}
       
       <Footer />
     </div>

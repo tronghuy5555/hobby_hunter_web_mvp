@@ -13,6 +13,7 @@ export interface CardData {
 
 export interface MyCardsControllerProps {
   // Optional props for future extensions
+  initialTab?: TabType;
 }
 
 export type TabType = 'all' | 'locked';
@@ -23,6 +24,8 @@ export const useMyCardsController = (_props?: MyCardsControllerProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sellModalOpen, setSellModalOpen] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
 
   // Mock card data - in a real app, this would come from an API
   const allCards: CardData[] = [
@@ -114,7 +117,6 @@ export const useMyCardsController = (_props?: MyCardsControllerProps) => {
     setError(null);
     
     try {
-      // In a real app, this would call an API to initiate the sell process
       const card = allCards.find(c => c.id === cardId);
       if (!card) {
         throw new Error('Card not found');
@@ -124,20 +126,31 @@ export const useMyCardsController = (_props?: MyCardsControllerProps) => {
         throw new Error('This card is not available for sale');
       }
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Show success message
-      alert(`${card.cardName} has been listed for sale at ${card.sellFor}`);
-      
-      // In a real app, you would update the card status in the store
-      // and refresh the data from the API
+      // Open sell confirmation modal
+      setSelectedCardId(cardId);
+      setSellModalOpen(true);
       
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to sell card';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to initiate card sale';
       setError(errorMessage);
       alert(errorMessage);
     }
+  };
+
+  // Handle sell modal close
+  const handleSellModalClose = () => {
+    setSellModalOpen(false);
+    setSelectedCardId(null);
+  };
+
+  // Handle sell completion
+  const handleSellComplete = () => {
+    // In a real app, you would refresh the card data from the API
+    // For now, we'll just close the modal
+    handleSellModalClose();
+    
+    // Optionally reload the page data
+    // window.location.reload();
   };
 
   // Handle shipping a card
@@ -194,6 +207,8 @@ export const useMyCardsController = (_props?: MyCardsControllerProps) => {
     activeTab,
     isLoading,
     error,
+    sellModalOpen,
+    selectedCardId,
     
     // Data
     allCards,
@@ -204,6 +219,8 @@ export const useMyCardsController = (_props?: MyCardsControllerProps) => {
     handleTabChange,
     handleSell,
     handleShip,
+    handleSellModalClose,
+    handleSellComplete,
     
     // Utils
     getStatusBadgeConfig,
