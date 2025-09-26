@@ -14,6 +14,7 @@ import type {
   User,
   AuthCredentials,
   RegisterData,
+  RegisterResponse,
   VerificationData,
   UpdateUserData,
   ShippingAddress,
@@ -69,23 +70,17 @@ export function useLogin() {
  */
 export function useRegister() {
   const queryClient = useQueryClient();
-  const { setUser } = useAppStore();
 
   return useMutation({
     mutationFn: (userData: RegisterData) => userRepository.register(userData),
     onSuccess: (response) => {
       if (response.success && response.data) {
-        const { user, tokens } = response.data;
+        // Registration successful, but no tokens are provided
+        // User will need to login separately to get tokens
+        console.log('Registration successful:', response.data.message);
         
-        // Store user in global state
-        setUser(user);
-        
-        // Store auth tokens securely
-        localStorage.setItem('auth_token', tokens.accessToken);
-        localStorage.setItem('refresh_token', tokens.refreshToken);
-        
-        // Cache user profile
-        queryClient.setQueryData(queryKeys.users.profile(user.id), response);
+        // Optionally clear any cached data
+        queryClient.clear();
       }
     },
     onError: (error) => {

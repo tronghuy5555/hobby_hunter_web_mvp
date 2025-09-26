@@ -11,6 +11,7 @@ import type {
   User,
   AuthCredentials,
   RegisterData,
+  RegisterResponse,
   AuthTokens,
   VerificationData,
   CreateUserData,
@@ -85,7 +86,7 @@ export class UserRepository extends BaseRepository<User> {
   /**
    * Register a new user account
    */
-  async register(userData: RegisterData): Promise<ApiResponse<{ user: User; tokens: AuthTokens }>> {
+  async register(userData: RegisterData): Promise<ApiResponse<RegisterResponse>> {
     return this.makeApiCall(
       'POST',
       apiEndpoints.auth.register,
@@ -370,28 +371,26 @@ export class UserRepository extends BaseRepository<User> {
     return { user: mockUser, tokens: mockTokens };
   }
 
-  private async getMockRegisterData(userData: RegisterData): Promise<{ user: User; tokens: AuthTokens }> {
+  private async getMockRegisterData(userData: RegisterData): Promise<RegisterResponse> {
     await RepositoryUtils.simulateDelay();
     
-    const mockUser: User = {
-      id: RepositoryUtils.generateMockId(),
-      email: userData.email,
-      fullName: userData.fullName,
-      phoneNumber: userData.phoneNumber,
-      credits: 100, // Welcome bonus
-      cards: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+    const userId = RepositoryUtils.generateMockId();
+    const createdAt = new Date().toISOString();
+    
+    const registerResponse: RegisterResponse = {
+      user: {
+        id: userId,
+        email: userData.email,
+        created_at: createdAt,
+      },
+      profile: {
+        id: userId,
+        username: userData.username,
+      },
+      message: "User and profile registered successfully. Please login to get access token."
     };
 
-    const mockTokens: AuthTokens = {
-      accessToken: 'mock_access_token',
-      refreshToken: 'mock_refresh_token',
-      expiresIn: 3600,
-      tokenType: 'Bearer',
-    };
-
-    return { user: mockUser, tokens: mockTokens };
+    return registerResponse;
   }
 
   private async getMockVerifyData(verificationData: VerificationData): Promise<{ verified: boolean }> {

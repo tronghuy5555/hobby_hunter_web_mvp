@@ -28,6 +28,8 @@ export type {
   Transaction,
   AuthCredentials,
   RegisterData,
+  RegisterResponse,
+  UserProfile,
   VerificationData,
   CardFilters,
   ShipCardsRequest,
