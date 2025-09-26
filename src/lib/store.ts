@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import type { User } from '@/services';
 
 export interface Card {
   id: string;
@@ -18,16 +19,6 @@ export interface Pack {
   image: string;
   cardCount: number;
   guaranteed?: string;
-}
-
-export interface User {
-  id: string;
-  email: string;
-  credits: number;
-  cards: Card[];
-  fullName?: string;
-  phoneNumber?: string;
-  address?: string;
 }
 
 interface AppState {

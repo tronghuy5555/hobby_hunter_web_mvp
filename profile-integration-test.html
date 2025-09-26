@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication + Profile Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .loading {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        details {
+            margin-top: 10px;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .endpoint-info {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔐 Authentication + Profile Integration Test</h1>
+        <p>Test the complete login flow with profile fetching:</p>
+        
+        <div class="endpoint-info">
+            <strong>Endpoints:</strong><br>
+            POST /auth/login → GET /users/profile
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="user@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" value="password123" required>
+            </div>
+            
+            <button type="submit" id="loginBtn">🚀 Test Complete Flow</button>
+            <button type="button" id="profileBtn" disabled>👤 Test Profile Only</button>
+            <button type="button" id="clearBtn">🗑️ Clear Storage</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>🧪 Integration Test Results</h2>
+        <div id="integrationResult">
+            <div class="info">
+                <p>This test simulates the actual authentication flow used in your app:</p>
+                <ol>
+                    <li>🔑 Call <code>/auth/login</code> with credentials</li>
+                    <li>💾 Store access_token and refresh_token</li>
+                    <li>👤 Call <code>/users/profile</code> with the user ID</li>
+                    <li>🔄 Merge login + profile data into complete User object</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://hunterna-api-production.up.railway.app';
+        let currentUserId = null;
+        
+        // Elements
+        const loginBtn = document.getElementById('loginBtn');
+        const profileBtn = document.getElementById('profileBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const resultDiv = document.getElementById('result');
+        const integrationResultDiv = document.getElementById('integrationResult');
+        
+        // Complete authentication flow (matches your app)
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await testCompleteAuthFlow();
+        });
+        
+        // Test profile endpoint only
+        profileBtn.addEventListener('click', async () => {
+            if (currentUserId) {
+                await testProfileEndpoint(currentUserId);
+            } else {
+                showResult('error', 'No user ID available. Please login first.');
+            }
+        });
+        
+        // Clear storage
+        clearBtn.addEventListener('click', () => {
+            localStorage.clear();
+            currentUserId = null;
+            profileBtn.disabled = true;
+            showResult('info', 'Storage cleared.');
+        });
+        
+        async function testCompleteAuthFlow() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            showLoading('🔄 Testing complete authentication flow...');
+            
+            try {
+                // Step 1: Login
+                showIntegrationStep('🔑 Step 1: Authenticating...');
+                const loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                if (!loginResponse.ok) {
+                    const errorData = await loginResponse.json();
+                    throw new Error(`Login failed: ${loginResponse.status} - ${errorData.message || 'Unknown error'}`);
+                }
+                
+                const loginData = await loginResponse.json();
+                showIntegrationStep('✅ Step 1: Login successful!');
+                
+                // Step 2: Store tokens
+                showIntegrationStep('💾 Step 2: Storing tokens...');
+                localStorage.setItem('access_token', loginData.access_token);
+                localStorage.setItem('refresh_token', loginData.refresh_token);
+                currentUserId = loginData.user.id;
+                profileBtn.disabled = false;
+                
+                // Step 3: Fetch profile
+                showIntegrationStep('👤 Step 3: Fetching user profile...');
+                const profileResponse = await fetch(`${API_BASE_URL}/users/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${loginData.access_token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                let profileData = null;
+                let profileError = null;
+                
+                if (profileResponse.ok) {
+                    profileData = await profileResponse.json();
+                    showIntegrationStep('✅ Step 3: Profile fetched successfully!');
+                } else {
+                    const errorData = await profileResponse.json();
+                    profileError = `Profile fetch failed: ${profileResponse.status} - ${errorData.message || 'Unknown error'}`;
+                    showIntegrationStep(`❌ Step 3: ${profileError}`);
+                }
+                
+                // Step 4: Create complete user object
+                showIntegrationStep('🔄 Step 4: Creating complete user object...');
+                const completeUser = createCompleteUser(loginData, profileData);
+                
+                // Show results
+                showSuccessResult(loginData, profileData, completeUser, profileError);
+                showIntegrationStep('🎉 Integration test complete!');
+                
+            } catch (error) {
+                showResult('error', `❌ Integration test failed: ${error.message}`);
+                showIntegrationStep(`❌ Integration test failed: ${error.message}`);
+            }
+        }
+        
+        async function testProfileEndpoint(userId) {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                showResult('error', 'No access token found. Please login first.');
+                return;
+            }
+            
+            showLoading('👤 Testing profile endpoint...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('success', `
+                        <h3>✅ Profile Fetch Successful!</h3>
+                        <p><strong>User ID:</strong> ${data.id}</p>
+                        <p><strong>Username:</strong> ${data.username}</p>
+                        <p><strong>Account Balance:</strong> ${data.account_balance}</p>
+                        <p><strong>Theme:</strong> ${data.preferences.theme}</p>
+                        <p><strong>Auto Convert Days:</strong> ${data.preferences.autoConvertAfterDays}</p>
+                        <details>
+                            <summary>Full Profile Response</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    `);
+                } else {
+                    showResult('error', `
+                        <h3>❌ Profile Fetch Failed</h3>
+                        <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                        <p><strong>Error:</strong> ${data.message || 'Unknown error'}</p>
+                        <details>
+                            <summary>Error Response</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    `);
+                }
+            } catch (error) {
+                showResult('error', `❌ Network Error: ${error.message}`);
+            }
+        }
+        
+        function createCompleteUser(loginData, profileData) {
+            if (profileData) {
+                return {
+                    id: profileData.id,
+                    email: loginData.user.email,
+                    username: profileData.username,
+                    credits: profileData.account_balance,
+                    cards: [],
+                    preferences: profileData.preferences,
+                    createdAt: profileData.created_at,
+                    updatedAt: profileData.updated_at
+                };
+            } else {
+                // Fallback user object (matches your AuthController)
+                return {
+                    id: loginData.user.id,
+                    email: loginData.user.email,
+                    credits: 100,
+                    cards: [],
+                    createdAt: loginData.user.created_at,
+                    updatedAt: new Date().toISOString()
+                };
+            }
+        }
+        
+        function showSuccessResult(loginData, profileData, completeUser, profileError) {
+            let html = `
+                <div class="success">
+                    <h3>🎉 Complete Authentication Flow Test Results</h3>
+                    
+                    <h4>🔑 Login Response:</h4>
+                    <p><strong>User ID:</strong> ${loginData.user.id}</p>
+                    <p><strong>Email:</strong> ${loginData.user.email}</p>
+                    <p><strong>Access Token:</strong> ${loginData.access_token.substring(0, 50)}...</p>
+                    
+                    <h4>👤 Profile Response:</h4>
+            `;
+            
+            if (profileData) {
+                html += `
+                    <p><strong>Username:</strong> ${profileData.username}</p>
+                    <p><strong>Account Balance:</strong> ${profileData.account_balance}</p>
+                    <p><strong>Theme:</strong> ${profileData.preferences.theme}</p>
+                    <p><strong>Auto Convert Days:</strong> ${profileData.preferences.autoConvertAfterDays}</p>
+                `;
+            } else {
+                html += `<p style="color: #dc3545;">⚠️ Profile fetch failed: ${profileError}</p>`;
+            }
+            
+            html += `
+                    <h4>🔄 Final User Object (as used in app):</h4>
+                    <p><strong>Credits:</strong> ${completeUser.credits}</p>
+                    <p><strong>Username:</strong> ${completeUser.username || 'Not available'}</p>
+                    
+                    <details>
+                        <summary>Complete User Object</summary>
+                        <pre>${JSON.stringify(completeUser, null, 2)}</pre>
+                    </details>
+                    
+                    <details>
+                        <summary>Raw API Responses</summary>
+                        <h5>Login Response:</h5>
+                        <pre>${JSON.stringify(loginData, null, 2)}</pre>
+                        ${profileData ? `<h5>Profile Response:</h5><pre>${JSON.stringify(profileData, null, 2)}</pre>` : ''}
+                    </details>
+                </div>
+            `;
+            
+            resultDiv.innerHTML = html;
+        }
+        
+        function showResult(type, content) {
+            resultDiv.innerHTML = `<div class="${type}">${content}</div>`;
+        }
+        
+        function showLoading(message) {
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Testing...';
+            resultDiv.innerHTML = `<div class="loading">${message}</div>`;
+        }
+        
+        function showIntegrationStep(message) {
+            const currentContent = integrationResultDiv.innerHTML;
+            if (currentContent.includes('Integration Test Results')) {
+                integrationResultDiv.innerHTML = currentContent + `<p>${message}</p>`;
+            } else {
+                integrationResultDiv.innerHTML = `<p>${message}</p>`;
+            }
+        }
+        
+        // Reset button state
+        function resetButtons() {
+            loginBtn.disabled = false;
+            loginBtn.textContent = '🚀 Test Complete Flow';
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            const accessToken = localStorage.getItem('access_token');
+            if (accessToken) {
+                showResult('info', `
+                    <h3>🔐 Stored Authentication Found</h3>
+                    <p>Access token and refresh token are stored.</p>
+                    <p>You can test the profile endpoint or login again.</p>
+                `);
+                profileBtn.disabled = false;
+            }
+            resetButtons();
+        });
+        
+        // Reset buttons after operations
+        document.addEventListener('click', () => {
+            setTimeout(resetButtons, 100);
+        });
+    </script>
+</body>
+</html>

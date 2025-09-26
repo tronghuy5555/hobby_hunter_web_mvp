@@ -81,12 +81,33 @@ class HttpClient {
   };
 
   /**
-   * Get authentication token (placeholder implementation)
+   * Get authentication token from localStorage
    */
   private getAuthToken(): string | null {
-    // In real implementation, this would retrieve the actual token
-    // from secure storage or the auth store
+    // Try to get the access_token first (from real API response)
+    const accessToken = localStorage.getItem('access_token');
+    if (accessToken) {
+      return accessToken;
+    }
+    
+    // Fallback to legacy auth_token for backward compatibility
     return localStorage.getItem('auth_token');
+  }
+
+  /**
+   * Set authentication token in localStorage
+   */
+  setAuthToken(token: string): void {
+    localStorage.setItem('access_token', token);
+  }
+
+  /**
+   * Clear authentication token from localStorage
+   */
+  clearAuthToken(): void {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('auth_token'); // Clear legacy token as well
   }
 
   /**

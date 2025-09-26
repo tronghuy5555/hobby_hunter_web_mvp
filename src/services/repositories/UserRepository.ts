@@ -19,6 +19,10 @@ import type {
   ShippingAddress,
   UserPreferences,
   UserSettings,
+  LoginResponse,
+  Transaction,
+  UserProfileApiResponse,
+  UserApiPreferences,
 } from '../types/domain';
 import type {
   ApiResponse,
@@ -41,9 +45,9 @@ export class UserRepository extends BaseRepository<User> {
   /**
    * Transform request data for API
    */
-  protected transformRequest(data: any): any {
+  protected transformRequest(data: Record<string, unknown>): Record<string, unknown> {
     // Convert UI data format to API format
-    if (data.fullName) {
+    if (data.fullName && typeof data.fullName === 'string') {
       const [firstName, ...lastNameParts] = data.fullName.split(' ');
       return {
         ...data,
@@ -57,15 +61,15 @@ export class UserRepository extends BaseRepository<User> {
   /**
    * Transform API response to UI format
    */
-  protected transformResponse(data: any): User {
+  protected transformResponse(data: Record<string, unknown>): User {
     // Convert API format to UI format
-    if (data.firstName && data.lastName) {
+    if (data.firstName && data.lastName && typeof data.firstName === 'string' && typeof data.lastName === 'string') {
       return {
         ...data,
         fullName: `${data.firstName} ${data.lastName}`,
-      };
+      } as User;
     }
-    return data;
+    return data as unknown as User;
   }
 
   // ==================== Authentication Methods ====================
@@ -73,7 +77,7 @@ export class UserRepository extends BaseRepository<User> {
   /**
    * Authenticate user with email and password
    */
-  async authenticate(credentials: AuthCredentials): Promise<ApiResponse<{ user: User; tokens: AuthTokens }>> {
+  async authenticate(credentials: AuthCredentials): Promise<ApiResponse<LoginResponse>> {
     return this.makeApiCall(
       'POST',
       apiEndpoints.auth.login,
@@ -138,6 +142,47 @@ export class UserRepository extends BaseRepository<User> {
   // ==================== Profile Management Methods ====================
 
   /**
+   * Get user profile by user ID (uses the actual user ID from token)
+   */
+  async getUserProfile(userId: string): Promise<ApiResponse<User>> {
+    const response = await this.makeApiCall(
+      'GET',
+      apiEndpoints.users.profile,
+      undefined,
+      { userId },
+      () => this.getMockUserProfileData(userId)
+    );
+    
+    if (response.success && response.data) {
+      // Transform API response to User interface
+      const profileData = response.data as UserProfileApiResponse;
+      const user: User = this.transformProfileToUser(profileData);
+      return { 
+        ...response, 
+        data: user 
+      } as ApiResponse<User>;
+    }
+    
+    return response as unknown as ApiResponse<User>;
+  }
+
+  /**
+   * Transform API profile response to User interface
+   */
+  private transformProfileToUser(profile: UserProfileApiResponse): User {
+    return {
+      id: profile.id,
+      email: '', // Will be set from login response
+      username: profile.username,
+      credits: profile.account_balance,
+      cards: [], // Will be fetched separately
+      preferences: profile.preferences as UserApiPreferences,
+      createdAt: profile.created_at,
+      updatedAt: profile.updated_at,
+    };
+  }
+
+  /**
    * Get user profile by ID
    */
   async getProfile(userId: string): Promise<ApiResponse<User>> {
@@ -195,7 +240,7 @@ export class UserRepository extends BaseRepository<User> {
   /**
    * Get user credit balance
    */
-  async getCredits(userId: string): Promise<ApiResponse<{ credits: number; history: any[] }>> {
+  async getCredits(userId: string): Promise<ApiResponse<{ credits: number; history: Transaction[] }>> {
     return this.makeApiCall(
       'GET',
       apiEndpoints.users.credits,
@@ -224,14 +269,15 @@ export class UserRepository extends BaseRepository<User> {
   async getTransactionHistory(
     userId: string,
     filters?: { dateFrom?: string; dateTo?: string; type?: string }
-  ): Promise<PaginatedResponse<any>> {
-    return this.makeApiCall(
+  ): Promise<ApiResponse<PaginatedResponse<Transaction>>> {
+    const result = await this.makeApiCall(
       'GET',
       apiEndpoints.users.transactions,
       undefined,
       { userId, ...filters },
       () => this.getMockTransactionHistoryData(userId, filters)
     );
+    return result;
   }
 
   // ==================== Account Settings Methods ====================
@@ -330,9 +376,31 @@ export class UserRepository extends BaseRepository<User> {
     return RepositoryUtils.createSuccessResponse(undefined, 'User deleted successfully');
   }
 
+  private async getMockUserProfileData(userId: string): Promise<UserProfileApiResponse> {
+    await RepositoryUtils.simulateDelay();
+    
+    const mockProfile: UserProfileApiResponse = {
+      id: userId,
+      username: 'johndoe',
+      account_balance: 150,
+      preferences: {
+        theme: 'auto',
+        soundEnabled: true,
+        animationSpeed: 'normal',
+        vibrationEnabled: true,
+        emailNotifications: true,
+        autoConvertAfterDays: 7,
+      },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    return mockProfile;
+  }
+
   // ==================== Authentication Mock Data ====================
 
-  private async getMockAuthData(credentials: AuthCredentials): Promise<{ user: User; tokens: AuthTokens }> {
+  private async getMockAuthData(credentials: AuthCredentials): Promise<LoginResponse> {
     await RepositoryUtils.simulateDelay();
     
     // Mock authentication validation
@@ -340,35 +408,17 @@ export class UserRepository extends BaseRepository<User> {
       throw new Error('Invalid credentials');
     }
 
-    const mockUser: User = {
-      id: '1',
-      email: credentials.email,
-      credits: 100,
-      cards: [
-        {
-          id: '1',
-          name: 'Sephiroth',
-          rarity: 'legendary',
-          price: 100,
-          image: 'card-sephiroth.jpg',
-          finish: 'foil',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ],
-      fullName: 'John Doe',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+    const mockLoginResponse: LoginResponse = {
+      access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+      refresh_token: 'mock_refresh_token',
+      user: {
+        id: '1',
+        email: credentials.email,
+        created_at: new Date().toISOString(),
+      },
     };
 
-    const mockTokens: AuthTokens = {
-      accessToken: 'mock_access_token',
-      refreshToken: 'mock_refresh_token',
-      expiresIn: 3600,
-      tokenType: 'Bearer',
-    };
-
-    return { user: mockUser, tokens: mockTokens };
+    return mockLoginResponse;
   }
 
   private async getMockRegisterData(userData: RegisterData): Promise<RegisterResponse> {
@@ -409,8 +459,8 @@ export class UserRepository extends BaseRepository<User> {
     await RepositoryUtils.simulateDelay();
     
     return {
-      accessToken: 'new_mock_access_token',
-      refreshToken: 'new_mock_refresh_token',
+      access_token: 'new_mock_access_token',
+      refresh_token: 'new_mock_refresh_token',
       expiresIn: 3600,
       tokenType: 'Bearer',
     };
@@ -463,7 +513,7 @@ export class UserRepository extends BaseRepository<User> {
 
   // ==================== Credit Management Mock Data ====================
 
-  private async getMockCreditsData(userId: string): Promise<{ credits: number; history: any[] }> {
+  private async getMockCreditsData(userId: string): Promise<{ credits: number; history: Transaction[] }> {
     await RepositoryUtils.simulateDelay();
     
     return {
@@ -471,9 +521,14 @@ export class UserRepository extends BaseRepository<User> {
       history: [
         {
           id: '1',
+          userId: userId,
+          type: 'bonus_credit' as const,
           amount: 100,
-          type: 'welcome_bonus',
-          timestamp: new Date().toISOString(),
+          currency: 'USD',
+          status: 'completed' as const,
+          description: 'Welcome bonus',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         },
       ],
     };
@@ -492,17 +547,21 @@ export class UserRepository extends BaseRepository<User> {
 
   private async getMockTransactionHistoryData(
     userId: string,
-    filters?: any
-  ): Promise<PaginatedResponse<any>> {
+    filters?: { dateFrom?: string; dateTo?: string; type?: string }
+  ): Promise<PaginatedResponse<Transaction>> {
     await RepositoryUtils.simulateDelay();
     
-    const mockTransactions = [
+    const mockTransactions: Transaction[] = [
       {
         id: '1',
-        type: 'credit_purchase',
+        userId: userId,
+        type: 'credit_purchase' as const,
         amount: 100,
-        status: 'completed',
-        timestamp: new Date().toISOString(),
+        currency: 'USD',
+        status: 'completed' as const,
+        description: 'Credit purchase',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     ];
 

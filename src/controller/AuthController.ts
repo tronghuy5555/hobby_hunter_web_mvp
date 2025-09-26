@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useAppStore, Card } from '@/lib/store';
+import { useAppStore } from '@/lib/store';
+import { userRepository } from '@/services';
+import type { User, AuthCredentials, LoginResponse } from '@/services';
 
 export type AuthStep = 'initial' | 'signup' | 'login' | 'verify' | 'setup';
 
@@ -9,12 +11,7 @@ export interface AuthControllerProps {
   // Optional props for future extensions
 }
 
-export interface User {
-  id: string;
-  email: string;
-  credits: number;
-  cards: Card[];
-}
+
 
 export const useAuthController = (_props?: AuthControllerProps) => {
   const [searchParams] = useSearchParams();
@@ -109,13 +106,14 @@ export const useAuthController = (_props?: AuthControllerProps) => {
     setError(null);
 
     try {
-      // Simulate API call to create account and send verification code
+      // For now, we'll keep the mock behavior for signup since we only have login endpoint
+      // TODO: Implement actual registration when endpoint is available
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // In real app: send verification email
       console.log('Verification code sent to:', email);
       setStep('verify');
     } catch (error) {
+      console.error('Signup error:', error);
       setError('Failed to create account. Please try again.');
     } finally {
       setIsLoading(false);
@@ -133,51 +131,47 @@ export const useAuthController = (_props?: AuthControllerProps) => {
     setError(null);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const credentials: AuthCredentials = { email, password };
+      const response = await userRepository.authenticate(credentials);
       
-      // In real app: validate credentials
-      if (password === 'wrong') {
-        setError('Invalid password. Please try again.');
+      if (!response.success || !response.data) {
+        setError('Login failed. Please try again.');
         return;
       }
 
-      const mockUser: User = {
-        id: '1',
-        email,
-        credits: 100,
-        cards: [
-          {
-            id: '1',
-            name: 'Sephiroth',
-            rarity: 'legendary',
-            price: 100,
-            image: 'card-sephiroth.jpg',
-            finish: 'foil',
-          },
-          {
-            id: '2',
-            name: 'Cloud Strife',
-            rarity: 'epic',
-            price: 80,
-            image: 'card-cloud.jpg',
-            finish: 'reverse-foil',
-          },
-          {
-            id: '3',
-            name: 'Bahamut',
-            rarity: 'legendary',
-            price: 120,
-            image: 'card-bahamut.jpg',
-            finish: 'foil',
-          },
-        ],
-      };
+      const loginData: LoginResponse = response.data;
+      
+      // Store the authentication tokens
+      localStorage.setItem('access_token', loginData.access_token);
+      localStorage.setItem('refresh_token', loginData.refresh_token);
+      
+      // Fetch full user profile with the user ID from login response
+      const profileResponse = await userRepository.getUserProfile(loginData.user.id);
+      
+      let user: User;
+      if (profileResponse.success && profileResponse.data) {
+        // Use the full profile data
+        user = {
+          ...profileResponse.data,
+          email: loginData.user.email, // Ensure email is from login response
+        };
+      } else {
+        // Fallback to basic user data from login response
+        user = {
+          id: loginData.user.id,
+          email: loginData.user.email,
+          credits: 100, // Default credits
+          cards: [], // Empty initially
+          createdAt: loginData.user.created_at,
+          updatedAt: new Date().toISOString(),
+        };
+      }
 
-      setUser(mockUser);
+      setUser(user);
       navigate('/');
     } catch (error) {
-      setError('Login failed. Please try again.');
+      console.error('Login error:', error);
+      setError('Login failed. Please check your credentials and try again.');
     } finally {
       setIsLoading(false);
     }

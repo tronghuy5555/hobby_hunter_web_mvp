@@ -31,7 +31,7 @@ export const apiConfig: ApiConfig = {
   enableLogging: import.meta.env.VITE_ENABLE_API_LOGGING === 'true' || import.meta.env.DEV,
   mockDataFallback: import.meta.env.VITE_MOCK_DATA_FALLBACK !== 'false',
   featureFlags: {
-    useApiForAuthentication: import.meta.env.VITE_FEATURE_FLAG_API_AUTH === 'true',
+    useApiForAuthentication: true, // Enable real API authentication
     useApiForCards: import.meta.env.VITE_FEATURE_FLAG_API_CARDS === 'true',
     useApiForPacks: import.meta.env.VITE_FEATURE_FLAG_API_PACKS === 'true',
     useApiForTransactions: import.meta.env.VITE_FEATURE_FLAG_API_TRANSACTIONS === 'true',

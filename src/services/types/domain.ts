@@ -6,7 +6,7 @@
  * Based on existing store types but extended for API integration.
  */
 
-import type { BaseEntity } from './BaseRepository';
+import type { BaseEntity } from '../repositories/BaseRepository';
 
 /**
  * Card entity interface
@@ -46,11 +46,31 @@ export interface Pack extends BaseEntity {
 }
 
 /**
+ * User profile response from API
+ */
+export interface UserProfileApiResponse {
+  id: string;
+  username: string;
+  account_balance: number;
+  preferences: {
+    theme: 'auto' | 'light' | 'dark';
+    soundEnabled: boolean;
+    animationSpeed: 'slow' | 'normal' | 'fast';
+    vibrationEnabled: boolean;
+    emailNotifications: boolean;
+    autoConvertAfterDays: number;
+  };
+  created_at: string;
+  updated_at: string;
+}
+
+/**
  * User entity interface
  */
 export interface User extends BaseEntity {
   email: string;
-  credits: number;
+  username?: string;
+  credits: number; // Mapped from account_balance
   cards: Card[];
   fullName?: string;
   phoneNumber?: string;
@@ -59,11 +79,23 @@ export interface User extends BaseEntity {
   state?: string;
   zipCode?: string;
   country?: string;
-  preferences?: UserPreferences;
+  preferences?: UserApiPreferences;
   settings?: UserSettings;
   emailVerified?: boolean;
   phoneVerified?: boolean;
   status?: 'active' | 'suspended' | 'pending';
+}
+
+/**
+ * User preferences from API (different from UI preferences)
+ */
+export interface UserApiPreferences {
+  theme?: 'auto' | 'light' | 'dark';
+  soundEnabled?: boolean;
+  animationSpeed?: 'slow' | 'normal' | 'fast';
+  vibrationEnabled?: boolean;
+  emailNotifications?: boolean;
+  autoConvertAfterDays?: number;
 }
 
 /**
@@ -102,7 +134,7 @@ export interface Transaction extends BaseEntity {
   reference?: string;
   paymentMethod?: string;
   paymentId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   processedAt?: string;
   failureReason?: string;
 }
@@ -148,10 +180,52 @@ export interface RegisterData {
 }
 
 export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  tokenType: 'Bearer';
+  access_token: string;
+  refresh_token: string;
+  expiresIn?: number;
+  tokenType?: 'Bearer';
+}
+
+/**
+ * Login API response structure matching the actual API
+ */
+export interface LoginResponse {
+  access_token: string;
+  refresh_token: string;
+  user: {
+    id: string;
+    email: string;
+    created_at: string;
+  };
+}
+
+/**
+ * JWT token payload structure (decoded from access_token)
+ */
+export interface JWTPayload {
+  iss: string;
+  sub: string;
+  aud: string;
+  exp: number;
+  iat: number;
+  email: string;
+  phone?: string;
+  app_metadata: {
+    provider: string;
+    providers: string[];
+  };
+  user_metadata: {
+    email_verified: boolean;
+    username?: string;
+  };
+  role: string;
+  aal: string;
+  amr: Array<{
+    method: string;
+    timestamp: number;
+  }>;
+  session_id: string;
+  is_anonymous: boolean;
 }
 
 export interface VerificationData {
@@ -375,12 +449,12 @@ export interface CollectionStats {
 export interface SearchRequest {
   query: string;
   type?: 'cards' | 'packs' | 'all';
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   limit?: number;
   page?: number;
 }
 
-export interface SearchResult<T = any> {
+export interface SearchResult<T = unknown> {
   items: T[];
   total: number;
   facets?: Record<string, SearchFacet[]>;
@@ -405,7 +479,7 @@ export interface ValidationError {
 export interface BusinessError {
   type: 'insufficient_credits' | 'pack_out_of_stock' | 'card_not_available' | 'invalid_operation';
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 /**
