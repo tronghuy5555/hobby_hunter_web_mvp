@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Check API Test - Updated Format</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <h1>Email Check API Test - Updated Format</h1>
+    <p>This page tests the updated email check API that returns the new format with <code>exists</code> and <code>message</code> fields.</p>
+    
+    <div class="test-section">
+        <h3>Expected API Response Format</h3>
+        <div class="info">
+            <strong>Request:</strong><br>
+            POST /auth/check-email<br>
+            Body: { "email": "user@example.com" }<br><br>
+            
+            <strong>Response:</strong><br>
+            {<br>
+            &nbsp;&nbsp;"success": true,<br>
+            &nbsp;&nbsp;"data": {<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;"exists": true,<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;"message": "Email is already registered"<br>
+            &nbsp;&nbsp;}<br>
+            }
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test Email Check</h3>
+        <div class="form-group">
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" placeholder="Enter email to check" value="user@example.com">
+        </div>
+        <button class="btn" onclick="testEmailCheck()">Check Email</button>
+        <div id="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test Cases</h3>
+        <p>Click these buttons to test different scenarios:</p>
+        <button class="btn" onclick="testExistingEmail()">Test Existing Email</button>
+        <button class="btn" onclick="testNewEmail()">Test New Email</button>
+        <button class="btn" onclick="testInvalidEmail()">Test Invalid Email</button>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api'; // Adjust this to your API URL
+
+        async function testEmailCheck() {
+            const email = document.getElementById('email').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!email) {
+                showResult('Please enter an email address', 'error');
+                return;
+            }
+
+            try {
+                showResult('Checking email...', 'info');
+                
+                const response = await fetch(`${API_BASE_URL}/auth/check-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+                
+                // Show the raw response
+                showResult(
+                    `Response Status: ${response.status}\n\n` +
+                    `Response Body:\n${JSON.stringify(data, null, 2)}\n\n` +
+                    `Expected Format Check:\n` +
+                    `- Has 'success' field: ${data.hasOwnProperty('success')}\n` +
+                    `- Has 'data' field: ${data.hasOwnProperty('data')}\n` +
+                    `- Data has 'exists' field: ${data.data && data.data.hasOwnProperty('exists')}\n` +
+                    `- Data has 'message' field: ${data.data && data.data.hasOwnProperty('message')}\n` +
+                    `- Exists value: ${data.data ? data.data.exists : 'N/A'}\n` +
+                    `- Message: "${data.data ? data.data.message : 'N/A'}"`,
+                    response.ok ? 'success' : 'error'
+                );
+                
+            } catch (error) {
+                showResult(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testExistingEmail() {
+            document.getElementById('email').value = 'john@example.com';
+            await testEmailCheck();
+        }
+
+        async function testNewEmail() {
+            document.getElementById('email').value = 'newuser@example.com';
+            await testEmailCheck();
+        }
+
+        async function testInvalidEmail() {
+            document.getElementById('email').value = 'invalid-email';
+            await testEmailCheck();
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+        }
+
+        // Test on page load
+        window.onload = function() {
+            showResult('Ready to test the updated email check API format!', 'info');
+        };
+    </script>
+</body>
+</html>

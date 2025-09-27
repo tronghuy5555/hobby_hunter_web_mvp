@@ -77,7 +77,7 @@ export class UserRepository extends BaseRepository<User> {
   /**
    * Check if email exists in the system
    */
-  async checkEmailExists(email: string): Promise<ApiResponse<{ exists: boolean; email: string }>> {
+  async checkEmailExists(email: string): Promise<ApiResponse<{ exists: boolean; message: string }>> {
     return this.makeApiCall(
       'POST',
       apiEndpoints.auth.checkEmail,
