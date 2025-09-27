@@ -25,4 +25,4 @@ dist-ssr
 .qoder/*
 .serena/*
 .cursor/*
-.custom_modes/*
+custom_modes/*
