@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Check API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .loading {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .test-emails {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+        .test-emails h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .test-emails button {
+            margin: 5px;
+            padding: 8px 16px;
+            font-size: 14px;
+            background-color: #6c757d;
+        }
+        .test-emails button:hover {
+            background-color: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Email Check API Test</h1>
+        
+        <div class="form-group">
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" placeholder="Enter email to check" />
+        </div>
+        
+        <button onclick="checkEmail()">Check Email</button>
+        <button onclick="clearResult()">Clear</button>
+        
+        <div class="test-emails">
+            <h3>Quick Test Emails:</h3>
+            <button onclick="setEmail('user@example.com')">user@example.com</button>
+            <button onclick="setEmail('test@test.com')">test@test.com</button>
+            <button onclick="setEmail('newuser@gmail.com')">newuser@gmail.com</button>
+            <button onclick="setEmail('admin@hobby.com')">admin@hobby.com</button>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://hunterna-api-production.up.railway.app';
+        
+        function setEmail(email) {
+            document.getElementById('email').value = email;
+        }
+        
+        function clearResult() {
+            document.getElementById('result').innerHTML = '';
+        }
+        
+        async function checkEmail() {
+            const email = document.getElementById('email').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!email) {
+                resultDiv.innerHTML = '<div class="error">Please enter an email address</div>';
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                resultDiv.innerHTML = '<div class="error">Please enter a valid email address</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="loading">Checking email...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/check-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const exists = data.exists || data.data?.exists;
+                    const resultMessage = exists ? 
+                        `✅ Email "${email}" exists in the system` : 
+                        `❌ Email "${email}" does not exist in the system`;
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>Success!</strong><br>
+                            ${resultMessage}<br><br>
+                            <strong>Response:</strong><br>
+                            ${JSON.stringify(data, null, 2)}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <strong>API Error (${response.status}):</strong><br>
+                            ${JSON.stringify(data, null, 2)}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>Network Error:</strong><br>
+                        ${error.message}<br><br>
+                        <strong>Possible causes:</strong><br>
+                        • API server is not running<br>
+                        • Network connectivity issues<br>
+                        • CORS policy restrictions<br>
+                        • Endpoint not implemented yet
+                    </div>
+                `;
+            }
+        }
+        
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkEmail();
+            }
+        });
+    </script>
+</body>
+</html>

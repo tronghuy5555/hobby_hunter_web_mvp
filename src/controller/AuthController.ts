@@ -105,13 +105,35 @@ export const useAuthController = (_props?: AuthControllerProps) => {
     setFieldErrors(prev => ({ ...prev, email: null }));
 
     try {
-      // Check if user exists by attempting to get user info
-      // We'll use a simple check first, but this could be replaced with a dedicated endpoint
+      // Check if user exists using the real API endpoint
+      const response = await userRepository.checkEmailExists(email);
+      
+      if (!response.success || !response.data) {
+        // Handle API errors - fallback to local check if API unavailable
+        console.warn('Email check API failed, using local fallback');
+        const userExists = checkUserExists(email);
+        setEmailExists(userExists);
+        
+        if (userExists) {
+          setStep('login');
+        } else {
+          setStep('signup');
+        }
+      } else {
+        const { exists } = response.data;
+        setEmailExists(exists);
+        
+        if (exists) {
+          setStep('login');
+        } else {
+          setStep('signup');
+        }
+      }
+    } catch (error) {
+      console.error('Email check error:', error);
+      
+      // Fallback to local check on error
       const userExists = checkUserExists(email);
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
       setEmailExists(userExists);
       
       if (userExists) {
@@ -119,8 +141,9 @@ export const useAuthController = (_props?: AuthControllerProps) => {
       } else {
         setStep('signup');
       }
-    } catch (error) {
-      setError('Something went wrong. Please try again.');
+      
+      // Don't show error to user for email check failures
+      console.warn('Using fallback email check due to API error');
     } finally {
       setIsLoading(false);
     }

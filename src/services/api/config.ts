@@ -49,6 +49,7 @@ export const apiEndpoints = {
     logout: '/auth/logout',
     refresh: '/auth/refresh',
     verify: '/auth/verify',
+    checkEmail: '/auth/check-email',
   },
   // User endpoints
   users: {
