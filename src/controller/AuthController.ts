@@ -4,7 +4,7 @@ import { useAppStore } from '@/lib/store';
 import { userRepository } from '@/services';
 import type { User, AuthCredentials, LoginResponse, RegisterData, RegisterResponse, VerificationData } from '@/services';
 
-export type AuthStep = 'initial' | 'signup' | 'login' | 'verify' | 'setup';
+export type AuthStep = 'initial' | 'signup' | 'login' | 'verify' | 'setup' | 'email_check';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface AuthControllerProps {
@@ -19,12 +19,13 @@ export const useAuthController = (_props?: AuthControllerProps) => {
   const { setUser } = useAppStore();
 
   // Form state
-  const [step, setStep] = useState<AuthStep>('initial');
+  const [step, setStep] = useState<AuthStep>('email_check');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [shippingAddress, setShippingAddress] = useState('');
+  const [emailExists, setEmailExists] = useState<boolean | null>(null);
 
   // Loading and error states
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +45,9 @@ export const useAuthController = (_props?: AuthControllerProps) => {
     if (mode === 'signup') {
       setStep('signup');
     } else if (mode === 'login') {
-      setStep('initial');
+      setStep('email_check');
+    } else {
+      setStep('email_check');
     }
   }, [searchParams]);
 
@@ -93,18 +96,25 @@ export const useAuthController = (_props?: AuthControllerProps) => {
   // Handle initial email submission
   const handleEmailSubmit = async (): Promise<void> => {
     if (!isValidEmail(email)) {
-      setError('Please enter a valid email address');
+      setFieldErrors(prev => ({ ...prev, email: 'Please enter a valid email address' }));
       return;
     }
 
     setIsLoading(true);
     setError(null);
+    setFieldErrors(prev => ({ ...prev, email: null }));
 
     try {
+      // Check if user exists by attempting to get user info
+      // We'll use a simple check first, but this could be replaced with a dedicated endpoint
+      const userExists = checkUserExists(email);
+      
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      if (checkUserExists(email)) {
+      setEmailExists(userExists);
+      
+      if (userExists) {
         setStep('login');
       } else {
         setStep('signup');
@@ -114,6 +124,117 @@ export const useAuthController = (_props?: AuthControllerProps) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Handle login after email verification
+  const handleLoginWithPassword = async (): Promise<void> => {
+    // Clear previous errors
+    setError(null);
+    setFieldErrors({ email: null, password: null, verificationCode: null });
+
+    // Validate password before submission
+    const passwordError = password ? validatePassword(password) : 'Password is required';
+
+    if (passwordError) {
+      setFieldErrors({
+        email: null,
+        password: passwordError,
+        verificationCode: null,
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const credentials: AuthCredentials = { email, password };
+      const response = await userRepository.authenticate(credentials);
+      
+      if (!response.success || !response.data) {
+        // Handle specific API errors
+        if (response.error) {
+          switch (response.error.code) {
+            case 'INVALID_CREDENTIALS':
+            case 'UNAUTHORIZED':
+              setFieldErrors({
+                email: null,
+                password: 'Invalid password. Please try again.',
+                verificationCode: null,
+              });
+              break;
+            case 'ACCOUNT_LOCKED':
+              setError('Your account has been temporarily locked. Please contact support.');
+              break;
+            case 'VALIDATION_ERROR':
+              setError(response.error.message || 'Please check your input and try again.');
+              break;
+            default:
+              setError(response.error.message || 'Login failed. Please try again.');
+          }
+        } else {
+          setError('Login failed. Please check your credentials and try again.');
+        }
+        return;
+      }
+
+      const loginData: LoginResponse = response.data;
+      
+      // Store the authentication tokens
+      localStorage.setItem('access_token', loginData.access_token);
+      localStorage.setItem('refresh_token', loginData.refresh_token);
+      
+      // Fetch full user profile with the user ID from login response
+      const profileResponse = await userRepository.getUserProfile(loginData.user.id);
+      
+      let user: User;
+      if (profileResponse.success && profileResponse.data) {
+        // Use the full profile data
+        user = {
+          ...profileResponse.data,
+          email: loginData.user.email, // Ensure email is from login response
+        };
+      } else {
+        // Fallback to basic user data from login response
+        user = {
+          id: loginData.user.id,
+          email: loginData.user.email,
+          credits: 100, // Default credits
+          cards: [], // Empty initially
+          createdAt: loginData.user.created_at,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+
+      setUser(user);
+      navigate('/');
+    } catch (error: unknown) {
+      console.error('Login error:', error);
+      
+      // Handle network errors and other exceptions
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorName = error instanceof Error ? error.name : '';
+      
+      if (errorName === 'TypeError' && errorMessage.includes('fetch')) {
+        setError('Unable to connect to the server. Please check your internet connection and try again.');
+      } else if (errorMessage.includes('401')) {
+        setFieldErrors({
+          email: null,
+          password: 'Invalid password. Please try again.',
+          verificationCode: null,
+        });
+      } else if (errorMessage.includes('timeout')) {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle going to signup from email check
+  const handleGoToSignup = (): void => {
+    setStep('signup');
   };
 
   // Handle signup
@@ -206,119 +327,8 @@ export const useAuthController = (_props?: AuthControllerProps) => {
     }
   };
 
-  // Handle login
-  const handleLogin = async (): Promise<void> => {
-    // Clear previous errors
-    setError(null);
-    setFieldErrors({ email: null, password: null, verificationCode: null });
-
-    // Validate fields before submission
-    const emailError = email ? validateEmail(email) : 'Email is required';
-    const passwordError = password ? validatePassword(password) : 'Password is required';
-
-    if (emailError || passwordError) {
-      setFieldErrors({
-        email: emailError,
-        password: passwordError,
-        verificationCode: null,
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const credentials: AuthCredentials = { email, password };
-      const response = await userRepository.authenticate(credentials);
-      
-      if (!response.success || !response.data) {
-        // Handle specific API errors
-        if (response.error) {
-          switch (response.error.code) {
-            case 'INVALID_CREDENTIALS':
-            case 'UNAUTHORIZED':
-              setFieldErrors({
-                email: null,
-                password: 'Invalid email or password. Please try again.',
-                verificationCode: null,
-              });
-              break;
-            case 'USER_NOT_FOUND':
-              setFieldErrors({
-                email: 'No account found with this email address.',
-                password: null,
-                verificationCode: null,
-              });
-              break;
-            case 'ACCOUNT_LOCKED':
-              setError('Your account has been temporarily locked. Please contact support.');
-              break;
-            case 'VALIDATION_ERROR':
-              setError(response.error.message || 'Please check your input and try again.');
-              break;
-            default:
-              setError(response.error.message || 'Login failed. Please try again.');
-          }
-        } else {
-          setError('Login failed. Please check your credentials and try again.');
-        }
-        return;
-      }
-
-      const loginData: LoginResponse = response.data;
-      
-      // Store the authentication tokens
-      localStorage.setItem('access_token', loginData.access_token);
-      localStorage.setItem('refresh_token', loginData.refresh_token);
-      
-      // Fetch full user profile with the user ID from login response
-      const profileResponse = await userRepository.getUserProfile(loginData.user.id);
-      
-      let user: User;
-      if (profileResponse.success && profileResponse.data) {
-        // Use the full profile data
-        user = {
-          ...profileResponse.data,
-          email: loginData.user.email, // Ensure email is from login response
-        };
-      } else {
-        // Fallback to basic user data from login response
-        user = {
-          id: loginData.user.id,
-          email: loginData.user.email,
-          credits: 100, // Default credits
-          cards: [], // Empty initially
-          createdAt: loginData.user.created_at,
-          updatedAt: new Date().toISOString(),
-        };
-      }
-
-      setUser(user);
-      navigate('/');
-    } catch (error: unknown) {
-      console.error('Login error:', error);
-      
-      // Handle network errors and other exceptions
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      const errorName = error instanceof Error ? error.name : '';
-      
-      if (errorName === 'TypeError' && errorMessage.includes('fetch')) {
-        setError('Unable to connect to the server. Please check your internet connection and try again.');
-      } else if (errorMessage.includes('401')) {
-        setFieldErrors({
-          email: null,
-          password: 'Invalid email or password. Please try again.',
-          verificationCode: null,
-        });
-      } else if (errorMessage.includes('timeout')) {
-        setError('Request timed out. Please try again.');
-      } else {
-        setError('An unexpected error occurred. Please try again later.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Legacy handleLogin function (kept for compatibility)
+  const handleLogin = handleLoginWithPassword;
 
   // Handle email verification
   const handleVerification = async (): Promise<void> => {
@@ -540,6 +550,12 @@ export const useAuthController = (_props?: AuthControllerProps) => {
     const hasCodeError = !!fieldErrors.verificationCode;
     
     switch (step) {
+      case 'email_check':
+        return {
+          isValid: isValidEmail(email) && !hasEmailError,
+          canSubmit: isValidEmail(email) && !hasEmailError && !isLoading,
+          hasErrors: hasEmailError
+        };
       case 'initial':
         return {
           isValid: isValidEmail(email) && !hasEmailError,
@@ -582,6 +598,11 @@ export const useAuthController = (_props?: AuthControllerProps) => {
   // Get step title and description
   const getStepInfo = () => {
     switch (step) {
+      case 'email_check':
+        return {
+          title: 'Welcome to Hobby Hunter',
+          description: 'Enter your email to continue'
+        };
       case 'initial':
         return {
           title: 'Welcome to Hobby Hunter',
@@ -595,7 +616,7 @@ export const useAuthController = (_props?: AuthControllerProps) => {
       case 'login':
         return {
           title: 'Welcome to Hobby Hunter',
-          description: 'Log in to your account'
+          description: 'Enter your password'
         };
       case 'verify':
         return {
@@ -626,16 +647,19 @@ export const useAuthController = (_props?: AuthControllerProps) => {
     isLoading,
     error,
     fieldErrors,
+    emailExists,
 
     // Actions
     handleEmailSubmit,
     handleSignup,
     handleLogin,
+    handleLoginWithPassword,
     handleVerification,
     handleGoogleSignIn,
     handleSetupComplete,
     handleGoBack,
     handleGoHome,
+    handleGoToSignup,
 
     // Field updates
     updateEmail,
