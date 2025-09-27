@@ -39,12 +39,12 @@ const Header = () => {
               HOME
             </Link>
             <Link
-              to="/cards"
+              to="/packs"
               className={`text-sm font-medium transition-colors hover:text-primary ${
-                isActive('/cards') ? 'text-primary' : 'text-muted-foreground'
+                isActive('/packs') ? 'text-primary' : 'text-muted-foreground'
               }`}
             >
-              CARDS
+              PACKS
             </Link>
             <Link
               to="/about"

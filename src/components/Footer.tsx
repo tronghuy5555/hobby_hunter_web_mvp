@@ -15,7 +15,7 @@ const Footer = () => {
           </div>
           
           <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-400">
-            <Button variant="link" className="p-0 h-auto" onClick={() => navigate('/cards')}>
+            <Button variant="link" className="p-0 h-auto" onClick={() => navigate('/packs')}>
               CARDS
             </Button>
             <Button variant="link" className="p-0 h-auto" onClick={() => navigate('/about')}>

@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import { useAppStore } from "@/lib/store";
 import Home from "./pages/Home";
-import Cards from "./pages/Cards";
+import Packs from "./pages/Packs";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
 import MyCards from "./pages/MyCards";
@@ -31,7 +31,7 @@ const AppContent = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/cards" element={<Cards />} />
+      <Route path="/packs" element={<Packs />} />
       <Route path="/about" element={<About />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/my-cards" element={<MyCards />} />
