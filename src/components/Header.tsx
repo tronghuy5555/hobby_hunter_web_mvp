@@ -73,7 +73,7 @@ const Header = () => {
                       className="flex items-center space-x-2"
                     >
                       <User className="h-4 w-4" />
-                      <span className="hidden sm:inline">Paul Xing</span>
+                      <span className="hidden sm:inline">{user.username || user.email?.split('@')[0] || 'User'}</span>
                       <ChevronDown className="h-3 w-3" />
                     </Button>
                   </DropdownMenuTrigger>
